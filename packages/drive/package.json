@@ -1,0 +1,29 @@
+{
+  "name": "@nimo-deck/drive",
+  "version": "0.1.0",
+  "description": "Google Drive OAuth 2.0, backup snapshot archiving, restore engine, and sync loop defense for NIMO-DECK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
+  },
+  "dependencies": {
+    "@nimo-deck/core": "*",
+    "@nimo-deck/shared": "*",
+    "@nimo-deck/sync": "*",
+    "adm-zip": "^0.5.16",
+    "archiver": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/archiver": "^6.0.3"
+  }
+}

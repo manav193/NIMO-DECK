@@ -207,10 +207,13 @@ graph TD
 - **Repository Intelligence Inventory (`RepositoryInventoryGenerator`):** Generates centralized inventories detailing inactive repositories (> 60 days), uncommitted local edits, and open issue/PR metrics.
 
 ### 4.4 DECK DRIVE (`@nimo-deck/drive`)
-- **OAuth 2.0 Handshake:** Secure local loopback authentication with refresh token lifecycle.
-- **Snapshot Generator:** Compresses sanitized project files (excluding dependencies, build artifacts, and ignored files) into gzip tarballs.
-- **Loop Prevention System:** Generates a deterministic SHA-256 manifest of files included in the snapshot. The sync engine ignores changes marked with the NIMO-DECK synchronization token.
-- **Disaster Recovery:** Downloads and extracts versioned snapshots to recover repositories or audit historic states.
+- **OAuth 2.0 PKCE Handshake (`OAuthHandler`):** Implements RFC 7636 PKCE OAuth 2.0 flow with local loopback listener (`http://127.0.0.1:4567/oauth/callback`), secure authorization code exchange, and automatic refresh token rotation through `CredentialStore`.
+- **Google Drive v3 REST Client (`DriveClient`):** Lightweight client supporting multipart/related uploads with metadata, folder hierarchy creation (`NIMO-DECK / <project-name> / {snapshots, docs, releases}`), recursive folder search, file listing, and binary stream downloads.
+- **Snapshot Generator (`SnapshotBuilder`):** Assembles in-memory ZIP archives of project source files, strictly excluding `.git`, `node_modules`, `dist`, `.env`, and files matching `IMMUTABLE_IGNORED_PATTERNS`. Embeds `deck-sync-manifest.json` at archive root.
+- **Loop Prevention Engine (`LoopGuard` & `ManifestGenerator`):** Computes deterministic SHA-256 fingerprints across all files. Assigns ephemeral `syncToken` UUIDs with a sliding TTL window (default: 120s) so background watchers discard self-generated filesystem events during backup/restore.
+- **Documentation Mirror (`DocsMirror`):** Scans repositories for markdown files (`.md`, `.mdx`), computes content hashes, and synchronizes project documentation to the `docs/` folder in Google Drive.
+- **Disaster Restore Engine (`RestoreEngine`):** Downloads and verifies snapshot archives against recorded SHA-256 digests. Mandates explicit user confirmation (`confirmRestore: true`), enforces strict path-traversal safety, and restores verified files to disk without data loss.
+- **Backup Service Coordinator (`DriveBackupService`):** High-level orchestrator managing snapshot creation, duplicate upload avoidance via content SHA-256 comparisons, release archives, and persistent audit logging in `drive_backups`.
 
 ### 4.5 DECK INTELLIGENCE (`@nimo-deck/intelligence`)
 - **Adapter-Based AI Gateway:** Unified client supporting OpenRouter, Google Gemini, Anthropic Claude, OpenAI, and local endpoints (Ollama).

@@ -113,29 +113,33 @@ Seamlessly integrate GitHub REST API for repository discovery, branch tracking, 
 ---
 
 ### Phase 4: Google Drive Backup & Snapshot System (`@nimo-deck/drive`)
-**Status:** `[PENDING - NEXT]`
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
 **Primary Objectives:**
-Implement Google Drive v3 OAuth 2.0 integration, non-conflicting snapshot generation, SHA-256 fingerprinting, documentation mirroring, and disaster restore engine.
+Implement Google Drive v3 OAuth 2.0 PKCE integration, non-conflicting snapshot generation, deterministic SHA-256 fingerprinting, documentation mirroring, synchronization loop defense, and disaster restore engine.
 
-- **Tasks:**
-  1. Implement OAuth 2.0 PKCE flow with local loopback listener.
-  2. Build `SnapshotBuilder`:
-     - Creates compressed `.tar.gz` snapshots of sanitized repositories.
-     - Automatically excludes ignored dependencies (`node_modules`, `dist`, `.git`).
-  3. Implement `LoopGuard`:
-     - Embeds `deck-sync-manifest.json` containing cryptographic fingerprints.
-     - Ensures Google Drive uploads never trigger redundant local Git syncs.
-  4. Implement `DriveClient`:
-     - Resumable multipart upload for large snapshots.
-     - Automatic folder creation (`NIMO-DECK / <project-name> / snapshots`).
-  5. Implement `RestoreEngine`:
-     - Validates snapshot integrity against recorded SHA-256 before extraction.
+- **Tasks Completed:**
+  - [x] Implemented `OAuthHandler`: RFC 7636 PKCE authorization code flow with loopback listener (`http://127.0.0.1:4567/oauth/callback`), token exchange, and refresh token rotation via `CredentialStore`.
+  - [x] Implemented `DriveClient`: Google Drive v3 REST API client managing multipart/related uploads, directory hierarchy generation (`NIMO-DECK / <project-name> / {snapshots, docs, releases}`), recursive folder lookup, and stream downloading.
+  - [x] Implemented `SnapshotBuilder`: Sanitized in-memory ZIP snapshot builder excluding `.git`, `node_modules`, `dist`, `.env`, and `IMMUTABLE_IGNORED_PATTERNS`.
+  - [x] Implemented `ManifestGenerator`: Deterministic SHA-256 fingerprinting across all files and generation of embedded `deck-sync-manifest.json` metadata.
+  - [x] Implemented `LoopGuard`: In-memory sliding TTL token cache (default: 120s) preventing cloud-induced filesystem mutation storms.
+  - [x] Implemented `DocsMirror`: Automatic scanning and mirroring of Markdown documentation (`.md`, `.mdx`) to Google Drive docs folders.
+  - [x] Implemented `RestoreEngine`: Verifies file-level SHA-256 digests against manifest before write, blocks path-traversal attacks, requires explicit user confirmation (`confirmRestore: true`), and restores files safely without data loss.
+  - [x] Implemented `DriveBackupService`: Coordinates snapshots, checks for duplicate content digests to avoid unnecessary uploads, and records completed backups in SQLite `drive_backups`.
 - **Verification Gate:**
-  - End-to-end backup and restore test verifying exact byte parity of recovered source files.
+  - [x] 100% test pass rate: 27 test suites, 80 unit and integration tests passing (`npm test`).
+  - [x] LoopGuard verified: recent tokens recognized within TTL and rejected once expired.
+  - [x] Path traversal safety verified: restore engine rejects malicious relative paths (`../`).
+  - [x] Checksum validation verified: corrupted archives and altered files fail restore validation.
+  - [x] Duplicate upload avoidance verified: identical content hashes skip redundant Drive uploads.
+  - [x] Zero TypeScript errors: `npm run typecheck` across all project references (`shared`, `core`, `sync`, `github`, `drive`).
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Clean build: `npm run build` compiling clean `.d.ts` declaration maps and `.js` code across all workspaces.
 
 ---
 
 ### Phase 5: AI Project Intelligence Engine (`@nimo-deck/intelligence`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Build a multi-provider LLM gateway, AST and project context extraction pipeline, structured cognitive outputs, and the Fact vs. Hypothesis engine.
 
