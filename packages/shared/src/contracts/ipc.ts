@@ -36,6 +36,10 @@ export type IPCResponse<T = unknown> = {
 };
 
 export const IPCChannels = {
+  // System & Health
+  SYSTEM_GET_OVERVIEW: 'system:getOverview',
+  SYSTEM_HEALTH: 'system:health',
+
   // Project management
   PROJECT_LIST: 'project:list',
   PROJECT_GET: 'project:get',
@@ -51,24 +55,54 @@ export const IPCChannels = {
   SYNC_UPDATE_CONFIG: 'sync:updateConfig',
   SYNC_GET_STATUS: 'sync:getStatus',
 
+  // GitHub integration
+  GITHUB_GET_STATUS: 'github:getStatus',
+  GITHUB_LIST_REPOS: 'github:listRepos',
+  GITHUB_MAP_REPO: 'github:mapRepo',
+  GITHUB_GET_INVENTORY: 'github:getInventory',
+
   // Drive & Backups
+  DRIVE_GET_STATUS: 'drive:getStatus',
   DRIVE_CREATE_SNAPSHOT: 'drive:createSnapshot',
   DRIVE_LIST_BACKUPS: 'drive:listBackups',
   DRIVE_RESTORE: 'drive:restore',
+  DRIVE_GET_STORAGE_USAGE: 'drive:getStorageUsage',
 
   // AI Intelligence
   AI_ANALYZE_REPO: 'ai:analyzeRepo',
   AI_GET_RECOMMENDATIONS: 'ai:getRecommendations',
   AI_UPDATE_RECOMMENDATION: 'ai:updateRecommendation',
   AI_GET_ROADMAP: 'ai:getRoadmap',
+  AI_GET_MEMORY: 'ai:getMemory',
+  AI_GET_CROSS_PROJECT: 'ai:getCrossProject',
+  AI_CONVERT_ISSUE: 'ai:convertIssue',
 
-  // Vault & Audit
+  // Timeline
+  TIMELINE_GET: 'timeline:get',
+
+  // Vault & Recovery
+  VAULT_LIST_SNAPSHOTS: 'vault:listSnapshots',
+  VAULT_COMPARE_SNAPSHOTS: 'vault:compareSnapshots',
+  VAULT_RESTORE_PREVIEW: 'vault:restorePreview',
+  VAULT_RESTORE_EXECUTE: 'vault:restoreExecute',
+  VAULT_GENERATE_CHANGELOG: 'vault:generateChangelog',
   VAULT_LIST_AUDIT_LOGS: 'vault:listAuditLogs',
   VAULT_VERIFY_CHAIN: 'vault:verifyChain',
+  VAULT_APPLY_RETENTION: 'vault:applyRetention',
+
+  // Settings & Credentials
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_UPDATE: 'settings:update',
+  SETTINGS_GET_CREDENTIAL_STATUS: 'settings:getCredentialStatus',
+
+  // Onboarding
+  ONBOARDING_DISCOVER_PROJECTS: 'onboarding:discoverProjects',
+  ONBOARDING_COMPLETE: 'onboarding:complete',
 
   // Push notifications / events from Main to Renderer
   EVENT_SYNC_STATE_CHANGED: 'event:syncStateChanged',
-  EVENT_ALERT_RAISED: 'event:alertRaised'
+  EVENT_ALERT_RAISED: 'event:alertRaised',
+  EVENT_NOTIFICATION: 'event:notification'
 } as const;
 
 export type IPCChannelName = typeof IPCChannels[keyof typeof IPCChannels];

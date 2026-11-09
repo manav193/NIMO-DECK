@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM"]
+  },
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/core" },
+    { "path": "../../packages/sync" },
+    { "path": "../../packages/github" },
+    { "path": "../../packages/drive" },
+    { "path": "../../packages/intelligence" },
+    { "path": "../../packages/vault" },
+    { "path": "../../packages/dashboard" }
+  ],
+  "include": ["src/**/*"]
+}

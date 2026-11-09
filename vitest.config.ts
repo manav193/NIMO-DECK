@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['packages/**/*.{test,spec}.ts'],
+    include: ['{packages,apps}/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -19,7 +19,8 @@ export default defineConfig({
       '@nimo-deck/github': path.resolve(__dirname, './packages/github/src/index.ts'),
       '@nimo-deck/drive': path.resolve(__dirname, './packages/drive/src/index.ts'),
       '@nimo-deck/intelligence': path.resolve(__dirname, './packages/intelligence/src/index.ts'),
-      '@nimo-deck/vault': path.resolve(__dirname, './packages/vault/src/index.ts')
+      '@nimo-deck/vault': path.resolve(__dirname, './packages/vault/src/index.ts'),
+      '@nimo-deck/dashboard': path.resolve(__dirname, './packages/dashboard/src/index.ts')
     }
   }
 });

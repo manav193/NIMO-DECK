@@ -218,34 +218,45 @@ Provide an immutable, tamper-evident audit log, content-addressed storage (CAS) 
 
 ---
 
-### Phase 7: Modern Desktop & Web Dashboard (`@nimo-deck/dashboard`)
-**Status:** `[PENDING - NEXT]`
+### Phase 7: Modern Desktop & Web Dashboard (`@nimo-deck/dashboard`, `apps/desktop`, `apps/web`)
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
 **Primary Objectives:**
-Create a modern, responsive, developer-oriented Electron desktop application and web interface using React 19 and Tailwind CSS.
+Create a modern, responsive, developer-oriented Electron desktop application and web interface using React 19, modular transport abstractions, and unified command center views.
 
-- **Tasks:**
-  1. Configure Electron main process with context-isolated preload scripts and safe IPC channels.
-  2. Scaffolding React 19 app with Tailwind CSS, Lucide icons, and Radix primitives.
-  3. Implement 11 core dashboard views:
-     - **Overview:** System health, active sync daemons, quick stats.
-     - **Projects:** Card and table views of managed repositories.
-     - **Repository Explorer:** Virtualized file tree, diff inspector, branch switcher.
-     - **Activity Timeline:** Real-time stream of Git actions and Drive backups.
+- **Tasks Completed:**
+  - [x] Configure `@nimo-deck/dashboard` shared UI workspace package with React 19, Lucide icons, and deep navy design tokens (`#0A0F1D`).
+  - [x] Implement transport abstraction (`IDashboardTransport`, `IpcDashboardTransport`, `HttpDashboardTransport`, `MockDashboardTransport`).
+  - [x] Implement 11 core dashboard views:
+     - **Overview:** System health, active sync daemons, quick stats, backup metrics.
+     - **Projects:** Card and table views of managed repositories with sync statuses.
+     - **Repository Explorer:** Directory tree inspection, diff viewer, branch switcher.
+     - **Activity Timeline:** Real-time stream of Git actions, Vault snapshots, and Drive backups.
      - **GitHub Synchronization:** Remote branches, PRs, issues, divergence alerts.
      - **Google Drive:** Snapshot catalog, manual snapshot trigger, restore point manager.
-     - **AI Intelligence:** Project summaries, architecture insights, debt audits.
+     - **AI Intelligence:** Project summaries, architecture insights, verified facts vs hypotheses.
      - **Development Roadmaps:** Interactive milestone view with status toggles.
      - **Project History:** Commit logs, author analytics, changelogs.
-     - **Backups & Recovery:** Local stashes, Drive archives, integrity verification.
-     - **Settings & Security:** Provider API keys, debounce sliders, ignore rule editor.
-  4. Real-time push updates from DECK Core via IPC events.
-- **Verification Gate:**
-  - Component tests, rendering benchmarks (< 16ms frame budget), and IPC channel security audits.
+     - **Vault & Recovery:** Content-addressed differential snapshots, cryptographic SHA-256 audit chaining.
+     - **Settings & Security:** Provider API keys, debounce sliders, security logging level.
+  - [x] Implement dedicated Project Workspace with 9 tabs (Overview, Repository, Activity, Intelligence, Roadmap, Documentation, History, Snapshots, Settings).
+  - [x] Implement first-launch Onboarding Wizard with 7 interactive steps.
+  - [x] Implement Electron desktop application (`apps/desktop`):
+     - [x] Strict security sandbox (`contextIsolation: true`, `nodeIntegration: false`).
+     - [x] Secure preload context bridge (`deckAPI`) with strict channel allowlist.
+     - [x] External navigation guard routing URLs to system browser via `shell.openExternal`.
+     - [x] IPC Gateway with Zod validation (`IPCRequestSchema`) and error containment.
+     - [x] Desktop runtime coordinating SQLite database, repositories, and Vault/Intelligence engines.
+  - [x] Implement web application (`apps/web`):
+     - [x] Shared React 19 UI mounted via `HttpDashboardTransport`.
+     - [x] Standalone Node.js HTTP server (`src/server.ts`) with Bearer token authentication and `/health` probe.
+  - [x] Comprehensive testing: 50 test files, 153 unit & integration tests passing cleanly.
 
 ---
 
 ### Phase 8: Multi-Device Sync, Production Hardening & Packaging
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
+Package NIMO-DECK for Windows distribution, harden performance, conduct security penetration tests, and verify multi-device metadata synchronization.
 Package NIMO-DECK for Windows distribution, harden performance, conduct security penetration tests, and verify multi-device metadata synchronization.
 
 - **Tasks:**

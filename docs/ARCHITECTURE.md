@@ -256,17 +256,14 @@ graph TD
 - **Drive-Vault Integration (`DriveVaultIntegration`):**
   - Bridges local Vault snapshots with DECK DRIVE cloud backups and provides sync comparison diagnostics.
 
-### 4.7 DECK DASHBOARD (`@nimo-deck/dashboard`)
-- **Electron Shell:** Controls window states, native system tray, notifications, and secure context-isolated IPC channels.
-- **React 19 Presentation Tier:** Responsive UI built with Tailwind CSS, Lucide icons, and Radix primitives.
-- **Views:**
-  1. *Overview:* Health status across all registered projects.
-  2. *Repository Explorer:* Multi-repo tree, uncommitted diffs, branch status.
-  3. *Sync Control:* Real-time sync logs, debounce indicators, conflict alerts.
-  4. *Google Drive Vault:* Snapshot catalogs, backup schedules, restore points.
-  5. *AI Intelligence:* Interactive codebase analysis, debt audits, roadmap visualizer.
-  6. *Global Search:* Instant symbol, file, commit, and snapshot indexing.
-  7. *Settings & Security:* Secret management, provider API keys, sync rules.
+### 4.7 DECK DASHBOARD (`@nimo-deck/dashboard`, `apps/desktop`, `apps/web`)
+- **Shared UI Layer (`packages/dashboard`):** Headless React 19 component library and command center layouts with custom deep navy design tokens (`#0A0F1D`), dark/light theme switcher, collapsible sidebar, command palette (`Ctrl+K`), and notification tray.
+- **Electron Desktop Shell (`apps/desktop`):** Secure native desktop app featuring strict context isolation (`contextIsolation: true`, `nodeIntegration: false`), an explicit allowlist in the preload bridge, an external navigation sandbox guard, and an IPC Gateway validating payloads via Zod before invoking the `DesktopRuntime`.
+- **Web Command Center (`apps/web`):** Browser-accessible deployment with authenticated JSON-RPC server (`POST /api/deck/rpc`), Bearer token validation (`DECK_AUTH_TOKEN`), and health probes.
+- **Transport Abstraction:** `IDashboardTransport` interface with `IpcDashboardTransport`, `HttpDashboardTransport`, and `MockDashboardTransport`.
+- **11 System Views:** Overview, Projects, Repository Explorer, Activity Timeline, GitHub Sync, Google Drive, AI Intelligence, Development Roadmaps, Project History, Vault & Recovery, Settings & Security.
+- **Project Detail Workspace (9 Tabs):** Dedicated workspace for deep project inspection across Overview, Repository, Activity, Intelligence, Roadmap, Documentation, History, Snapshots, and Settings.
+- **Onboarding Wizard:** Interactive 7-step guide for discovery, Git authentication, Drive linking, and AI provider setup.
 
 ---
 

@@ -4,14 +4,15 @@
   "private": true,
   "description": "NIMO-DECK Personal Development Operating System",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint packages/**/src/**/*.ts",
-    "typecheck": "tsc -b packages/shared packages/core packages/sync packages/github packages/drive packages/intelligence packages/vault",
+    "lint": "eslint \"{packages,apps}/**/src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc -b packages/shared packages/core packages/sync packages/github packages/drive packages/intelligence packages/vault packages/dashboard apps/desktop apps/web",
     "clean": "node -e \"const fs = require('fs'); ['dist', 'build', '.turbo'].forEach(d => fs.rmSync(d, { recursive: true, force: true }));\""
   },
   "repository": {
@@ -33,18 +34,25 @@
     "@types/archiver": "^8.0.0",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.13.4",
+    "electron": "^45.2.3",
     "eslint": "^9.20.1",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.24.0",
     "vitest": "^3.0.5"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.107.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "adm-zip": "^0.6.1",
     "archiver": "^8.0.0",
     "better-sqlite3": "^13.0.3",
     "chokidar": "^6.0.0",
     "drizzle-orm": "^0.39.3",
     "eventemitter3": "^5.0.1",
+    "lucide-react": "^1.70.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "zod": "^3.24.2"
   }
 }

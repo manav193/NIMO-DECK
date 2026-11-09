@@ -1,0 +1,84 @@
+:root {
+  --deck-bg-navy: #0a0f1d;
+  --deck-bg-surface: #0f172a;
+  --deck-bg-surface-elevated: #1e293b;
+  --deck-bg-card: rgba(15, 23, 42, 0.75);
+  --deck-border: #1e293b;
+  --deck-border-focus: #3b82f6;
+  --deck-text-primary: #f8fafc;
+  --deck-text-secondary: #94a3b8;
+  --deck-text-muted: #64748b;
+  --deck-accent-blue: #3b82f6;
+  --deck-accent-blue-hover: #2563eb;
+  --deck-accent-blue-light: #60a5fa;
+  --deck-accent-blue-subtle: rgba(59, 130, 246, 0.12);
+  --deck-success: #10b981;
+  --deck-success-subtle: rgba(16, 185, 129, 0.12);
+  --deck-warning: #f59e0b;
+  --deck-warning-subtle: rgba(245, 158, 11, 0.12);
+  --deck-danger: #ef4444;
+  --deck-danger-subtle: rgba(239, 68, 68, 0.12);
+  --deck-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --deck-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --deck-radius-sm: 4px;
+  --deck-radius-md: 8px;
+  --deck-radius-lg: 12px;
+  --deck-radius-xl: 16px;
+  --deck-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+  --deck-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+  --deck-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='light'] {
+  --deck-bg-navy: #f8fafc;
+  --deck-bg-surface: #ffffff;
+  --deck-bg-surface-elevated: #f1f5f9;
+  --deck-bg-card: #ffffff;
+  --deck-border: #e2e8f0;
+  --deck-border-focus: #2563eb;
+  --deck-text-primary: #0f172a;
+  --deck-text-secondary: #475569;
+  --deck-text-muted: #94a3b8;
+  --deck-accent-blue: #2563eb;
+  --deck-accent-blue-hover: #1d4ed8;
+  --deck-accent-blue-light: #3b82f6;
+  --deck-accent-blue-subtle: rgba(37, 99, 235, 0.08);
+  --deck-success: #059669;
+  --deck-success-subtle: rgba(5, 150, 105, 0.08);
+  --deck-warning: #d97706;
+  --deck-warning-subtle: rgba(217, 119, 6, 0.08);
+  --deck-danger: #dc2626;
+  --deck-danger-subtle: rgba(220, 38, 38, 0.08);
+  --deck-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --deck-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --deck-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--deck-font);
+  background-color: var(--deck-bg-navy);
+  color: var(--deck-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--deck-bg-navy);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--deck-border);
+  border-radius: var(--deck-radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--deck-text-muted);
+}
