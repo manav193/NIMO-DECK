@@ -32,6 +32,9 @@ vitest.config.d.ts*
 *.key
 *.pkcs12
 *.pfx
+*.p12
+*.cer
+*.crt
 id_rsa
 id_rsa.pub
 id_ed25519

@@ -13,6 +13,8 @@
     "build": "npm run build:tsc && npm run build:main && npm run build:preload && npm run build:renderer",
     "package:win": "electron-builder --win",
     "package:dir": "electron-builder --win --dir",
+    "sign:binaries": "powershell -ExecutionPolicy Bypass -File ../../scripts/sign-binaries.ps1",
+    "verify:signatures": "powershell -ExecutionPolicy Bypass -File ../../scripts/verify-signatures.ps1",
     "start": "electron ./dist/main/main.js",
     "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('release', { recursive: true, force: true });\""
   },
@@ -32,6 +34,10 @@
       "**/node_modules/better-sqlite3/**"
     ],
     "win": {
+      "signingHashAlgorithms": [
+        "sha256"
+      ],
+      "rfc3161TimeStampServer": "http://timestamp.digicert.com",
       "target": [
         {
           "target": "nsis",

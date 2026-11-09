@@ -24,6 +24,7 @@ In compliance with Phase 8 verification rules, every system component is strictl
 | **External Cloud PostgreSQL Instance** | `PENDING EXTERNAL CONFIGURATION` | Requires user-provided `DATABASE_URL` connection string for hosted multi-tenant cloud persistence. |
 | **Live Google Drive API Client Secret** | `PENDING EXTERNAL CONFIGURATION` | Requires user-provided OAuth client ID & client secret from Google Cloud Console. |
 | **Live GitHub App Webhook Secret** | `PENDING EXTERNAL CONFIGURATION` | Requires live GitHub webhook URL and secret from GitHub Developer Settings. |
+| **Authenticode Code Signing & SAC Compatibility** | `PENDING EXTERNAL CONFIGURATION` | Requires user-provided commercial CA code signing certificate; pipeline, scripts, and verification gates are implemented and tested. |
 
 ---
 
@@ -45,6 +46,28 @@ The `ProductionLogger` (`packages/core/src/logging/production-logger.ts`) provid
 - Structured JSON format with RFC 3339 timestamps and module source tags.
 - Automatic rotating file sink (default: 10MB per file, 5 backup generations).
 - Zero-leak credential redaction: scans and strips GitHub PATs (`ghp_*`), OpenAI/Anthropic keys (`sk-*`), Bearer tokens, and private keys.
+
+### 3.4 Authenticode Code Signing & Smart App Control (SAC) Pipeline
+Windows 11 Smart App Control evaluates executables with the `VerifiedAndReputableDesktop` policy (GUID: `{0283ac0f-fff1-49ae-ada1-8a933130cad6}`), generating Event ID 3077 for unsigned or unverified PE files.
+
+NIMO-DECK implements an Authenticode signing and pre-release verification architecture:
+1. **Certificate Standards:**
+   - Commercial CA-issued RSA certificate (key length >= 2048-bit or 4096-bit).
+   - SHA-256 digest algorithm.
+   - RFC 3161 compliant timestamping (`http://timestamp.digicert.com`).
+   - Self-signed certificates are explicitly flagged as incompatible with SAC (they lack Microsoft ISG cloud reputation).
+2. **Credential Injection:**
+   - `CSC_LINK` + `CSC_KEY_PASSWORD` (PFX file or base64 environment variable).
+   - `CSC_THUMBPRINT` or `CSC_NAME` (Windows Certificate Store integration).
+   - Certificates and private keys are strictly blocked from Git commits via `.gitignore` and `@nimo-deck/sync` immutable ignore patterns.
+3. **PE Binaries Audited & Signed:**
+   - Application executable (`NIMO-DECK.exe`).
+   - Helper binaries and uninstallers (`elevate.exe`, `uninstaller.exe`).
+   - Native modules (`better-sqlite3/prebuilds/win32-x64.node`).
+   - Windows installer (`NIMO-DECK-Setup-0.1.0.exe`) and portable binary (`NIMO-DECK-Portable-0.1.0.exe`).
+4. **Automated Verification Gate:**
+   - Pre-release script `scripts/verify-signatures.ps1` verifies PE Authenticode signatures, timestamp existence, and publisher consistency.
+   - Strict mode (`powershell -File scripts/verify-signatures.ps1 -Strict` or `REQUIRE_SIGNING=true`) unconditionally aborts release generation if any binary is unsigned or invalid.
 
 ---
 

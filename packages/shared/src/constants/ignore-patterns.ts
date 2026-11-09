@@ -33,6 +33,9 @@ export const IMMUTABLE_IGNORED_PATTERNS: RegExp[] = [
   /\.key$/,
   /\.pkcs12$/,
   /\.pfx$/,
+  /\.p12$/,
+  /\.cer$/,
+  /\.crt$/,
   /(?:^|[/\\])id_rsa(?:\..*)?$/,
   /(?:^|[/\\])id_ed25519(?:\..*)?$/,
 
