@@ -192,3 +192,36 @@ DECK INTELLIGENCE organizes recommended improvements into an interactive, multi-
 1. **Zero Egress Mode:** Developers can configure NIMO-DECK to use only local models (via Ollama or local ONNX runtime), ensuring zero source code leaves the workstation.
 2. **Per-Project AI Opt-Out:** Sensitive repositories can be marked with `ai_analysis_enabled: false`.
 3. **Explicit Data Sanitization:** Inline comments matching `// @nimo-deck-ignore` or file patterns matching `.deckignore` are scrubbed before prompt generation.
+
+---
+
+## 8. Verified Implementation & Module Map
+
+The `@nimo-deck/intelligence` package implements this specification through the following modular components:
+
+| Component | File Path | Responsibilities |
+| :--- | :--- | :--- |
+| **OpenRouterAdapter** | `packages/intelligence/src/providers/openrouter-adapter.ts` | Multi-model cloud gateway with token tracking, cost estimation, and JSON schema extraction. |
+| **GeminiAdapter** | `packages/intelligence/src/providers/gemini-adapter.ts` | Google Gemini API integration with response schema enforcement and large-context window support. |
+| **OpenAIAdapter** | `packages/intelligence/src/providers/openai-adapter.ts` | OpenAI direct API client supporting `gpt-4o` and `gpt-4o-mini` with json_object response format. |
+| **ClaudeAdapter** | `packages/intelligence/src/providers/claude-adapter.ts` | Anthropic Claude API client supporting Claude 3.5 Sonnet and Haiku with token usage calculation. |
+| **OllamaAdapter** | `packages/intelligence/src/providers/ollama-adapter.ts` | Local inference engine connecting to Ollama on `localhost:11434`; zero API cost and zero network egress. |
+| **ProviderRegistry** | `packages/intelligence/src/providers/provider-registry.ts` | Multi-provider orchestration, exponential retry backoff, and automatic graceful fallback. |
+| **CostEstimator** | `packages/intelligence/src/providers/cost-estimator.ts` | Model-specific cost estimation per 1M prompt and completion tokens. |
+| **SecretRedactor** | `packages/intelligence/src/security/secret-redactor.ts` | Pre-transmission regex and Shannon entropy scanner that masks secrets with `[REDACTED_SECRET]`. |
+| **PromptInjectionGuard** | `packages/intelligence/src/security/prompt-injection-guard.ts` | Defends against instruction overrides and delimiters in untrusted READMEs and comments. |
+| **PrivacyGuard** | `packages/intelligence/src/security/privacy-guard.ts` | Enforces project opt-in / opt-out and local-only inference restrictions; generates transmission previews. |
+| **RepoScanner** | `packages/intelligence/src/ingestion/repo-scanner.ts` | Recursive filesystem traversal filtering out `.git`, `node_modules`, `dist`, `.env`, and ignored files. |
+| **ContentHashCache** | `packages/intelligence/src/ingestion/content-hash-cache.ts` | File-level SHA-256 caching enabling incremental codebase ingestion without re-parsing unchanged files. |
+| **ASTExtractor** | `packages/intelligence/src/ingestion/ast-extractor.ts` | TypeScript compiler API AST traversal extracting classes, functions, interfaces, line ranges, and complexity. |
+| **ManifestAnalyzer** | `packages/intelligence/src/ingestion/manifest-analyzer.ts` | Ingests `package.json` manifests, scripts, dependencies, devDependencies, and engine constraints. |
+| **DocExtractor** | `packages/intelligence/src/ingestion/doc-extractor.ts` | Prioritized markdown documentation parser (`README.md`, `ARCHITECTURE.md`, `docs/`). |
+| **TestStructureAnalyzer** | `packages/intelligence/src/ingestion/test-structure-analyzer.ts` | Discovers test files, test framework, and identifies source files without matching test coverage. |
+| **GitHistoryAnalyzer** | `packages/intelligence/src/ingestion/git-history-analyzer.ts` | Analyzes commit velocities, active authors, and file mutation hotspots. |
+| **ContextPacker** | `packages/intelligence/src/ingestion/context-packer.ts` | Token-budget-managed context packer assembling topology, manifests, docs, AST, and tests into secure prompts. |
+| **FactHypothesisEngine** | `packages/intelligence/src/analysis/fact-hypothesis-engine.ts` | Enforces verified fact grounding against actual codebase files, demoting unevidenced claims to hypotheses. |
+| **RecommendationGenerator** | `packages/intelligence/src/analysis/recommendation-generator.ts` | Prompts models for structured analyses, recommendations, and roadmaps with Zod schema validation. |
+| **GitHubIssueConverter** | `packages/intelligence/src/analysis/github-issue-converter.ts` | Converts `ACCEPTED` recommendations into GitHub issues via `@nimo-deck/github` with explicit user confirmation. |
+| **ProjectMemoryManager** | `packages/intelligence/src/memory/project-memory-manager.ts` | Manages persistent cognitive state (purpose, architecture, features, decisions, limitations) in SQLite. |
+| **CrossProjectAnalyzer** | `packages/intelligence/src/cross-project/cross-project-analyzer.ts` | Analyzes multi-project relationships, shared dependencies, duplicated symbols, and licensing compatibility. |
+| **DeckIntelligenceEngine** | `packages/intelligence/src/engine/deck-intelligence-engine.ts` | Central facade orchestrating scanning, incremental caching, provider dispatch, persistence, and event emission. |

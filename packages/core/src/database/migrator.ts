@@ -95,9 +95,12 @@ CREATE TABLE IF NOT EXISTS ai_analyses (
   id TEXT PRIMARY KEY,
   project_id TEXT NOT NULL,
   model_used TEXT NOT NULL,
+  commit_sha TEXT,
+  prompt_version TEXT DEFAULT 'v1.0',
   summary_markdown TEXT NOT NULL,
   tech_debt_report TEXT NOT NULL,
   security_report TEXT NOT NULL,
+  token_usage_json TEXT,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
@@ -118,7 +121,10 @@ CREATE TABLE IF NOT EXISTS ai_recommendations (
   dependencies_json TEXT NOT NULL,
   implementation_steps_json TEXT NOT NULL,
   suggested_diff_snippet TEXT,
-  status TEXT NOT NULL DEFAULT 'PROPOSED' CHECK(status IN ('PROPOSED', 'ACCEPTED', 'REJECTED', 'RESOLVED')),
+  status TEXT NOT NULL DEFAULT 'PROPOSED' CHECK(status IN ('PENDING', 'PROPOSED', 'ACCEPTED', 'REJECTED', 'RESOLVED', 'IMPLEMENTED', 'DEFERRED')),
+  evidence TEXT,
+  risks_json TEXT,
+  acceptance_criteria_json TEXT,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (analysis_id) REFERENCES ai_analyses(id) ON DELETE CASCADE,
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -126,7 +132,37 @@ CREATE TABLE IF NOT EXISTS ai_recommendations (
 
 CREATE INDEX IF NOT EXISTS idx_ai_recommendations_project_status ON ai_recommendations(project_id, status);
 
--- 9. AI Roadmaps
+-- 9. Project Memories (Persistent Cognitive State)
+CREATE TABLE IF NOT EXISTS project_memories (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  commit_sha TEXT,
+  purpose TEXT NOT NULL,
+  architecture TEXT NOT NULL,
+  implemented_features_json TEXT NOT NULL,
+  historical_decisions_json TEXT NOT NULL,
+  known_limitations_json TEXT NOT NULL,
+  current_state TEXT NOT NULL,
+  future_opportunities_json TEXT NOT NULL,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_memories_project ON project_memories(project_id);
+
+-- 10. Cross-Project Insights
+CREATE TABLE IF NOT EXISTS cross_project_insights (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  type TEXT NOT NULL CHECK(type IN ('SHARED_PACKAGE', 'REUSABLE_MODULE', 'ARCHITECTURE_SIMILARITY', 'DEPENDENCY_OVERLAP', 'INTEGRATION_OPPORTUNITY')),
+  project_ids_json TEXT NOT NULL,
+  description TEXT NOT NULL,
+  recommendation TEXT NOT NULL,
+  licensing_notes TEXT,
+  created_at INTEGER NOT NULL
+);
+
+-- 11. AI Roadmaps
 CREATE TABLE IF NOT EXISTS ai_roadmaps (
   id TEXT PRIMARY KEY,
   project_id TEXT NOT NULL,
@@ -136,7 +172,7 @@ CREATE TABLE IF NOT EXISTS ai_roadmaps (
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
--- 10. Audit Logs (Tamper-Evident Hash Chain)
+-- 12. Audit Logs (Tamper-Evident Hash Chain)
 CREATE TABLE IF NOT EXISTS audit_logs (
   id TEXT PRIMARY KEY,
   project_id TEXT,
@@ -151,7 +187,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at ASC);
 
--- 11. Vault Snapshots
+-- 13. Vault Snapshots
 CREATE TABLE IF NOT EXISTS vault_snapshots (
   id TEXT PRIMARY KEY,
   project_id TEXT NOT NULL,
@@ -168,4 +204,20 @@ CREATE TABLE IF NOT EXISTS vault_snapshots (
  */
 export function runMigrations(sqlite: Database.Database): void {
   sqlite.exec(MIGRATION_SQL);
+
+  // Safe non-destructive column additions for existing SQLite databases
+  const addCol = (table: string, col: string, def: string) => {
+    try {
+      sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def};`);
+    } catch {
+      // Column already exists or table freshly created
+    }
+  };
+
+  addCol('ai_analyses', 'commit_sha', 'TEXT');
+  addCol('ai_analyses', 'prompt_version', "TEXT DEFAULT 'v1.0'");
+  addCol('ai_analyses', 'token_usage_json', 'TEXT');
+  addCol('ai_recommendations', 'evidence', 'TEXT');
+  addCol('ai_recommendations', 'risks_json', 'TEXT');
+  addCol('ai_recommendations', 'acceptance_criteria_json', 'TEXT');
 }

@@ -84,9 +84,12 @@ export const aiAnalyses = sqliteTable('ai_analyses', {
     .references(() => projects.id, { onDelete: 'cascade' })
     .notNull(),
   modelUsed: text('model_used').notNull(),
+  commitSha: text('commit_sha'),
+  promptVersion: text('prompt_version').default('v1.0'),
   summaryMarkdown: text('summary_markdown').notNull(),
   techDebtReport: text('tech_debt_report').notNull(),
   securityReport: text('security_report').notNull(),
+  tokenUsageJson: text('token_usage_json'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
 });
 
@@ -107,9 +110,57 @@ export const aiRecommendations = sqliteTable('ai_recommendations', {
   dependenciesJson: text('dependencies_json').notNull(),
   implementationStepsJson: text('implementation_steps_json').notNull(),
   suggestedDiffSnippet: text('suggested_diff_snippet'),
-  status: text('status', { enum: ['PROPOSED', 'ACCEPTED', 'REJECTED', 'RESOLVED'] })
+  status: text('status', {
+    enum: [
+      'PENDING',
+      'PROPOSED',
+      'ACCEPTED',
+      'REJECTED',
+      'RESOLVED',
+      'IMPLEMENTED',
+      'DEFERRED'
+    ]
+  })
     .default('PROPOSED')
     .notNull(),
+  evidence: text('evidence'),
+  risksJson: text('risks_json'),
+  acceptanceCriteriaJson: text('acceptance_criteria_json'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const projectMemories = sqliteTable('project_memories', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .references(() => projects.id, { onDelete: 'cascade' })
+    .notNull(),
+  commitSha: text('commit_sha'),
+  purpose: text('purpose').notNull(),
+  architecture: text('architecture').notNull(),
+  implementedFeaturesJson: text('implemented_features_json').notNull(),
+  historicalDecisionsJson: text('historical_decisions_json').notNull(),
+  knownLimitationsJson: text('known_limitations_json').notNull(),
+  currentState: text('current_state').notNull(),
+  futureOpportunitiesJson: text('future_opportunities_json').notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const crossProjectInsights = sqliteTable('cross_project_insights', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  type: text('type', {
+    enum: [
+      'SHARED_PACKAGE',
+      'REUSABLE_MODULE',
+      'ARCHITECTURE_SIMILARITY',
+      'DEPENDENCY_OVERLAP',
+      'INTEGRATION_OPPORTUNITY'
+    ]
+  }).notNull(),
+  projectIdsJson: text('project_ids_json').notNull(),
+  description: text('description').notNull(),
+  recommendation: text('recommendation').notNull(),
+  licensingNotes: text('licensing_notes'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
 });
 

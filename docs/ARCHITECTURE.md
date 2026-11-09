@@ -216,13 +216,21 @@ graph TD
 - **Backup Service Coordinator (`DriveBackupService`):** High-level orchestrator managing snapshot creation, duplicate upload avoidance via content SHA-256 comparisons, release archives, and persistent audit logging in `drive_backups`.
 
 ### 4.5 DECK INTELLIGENCE (`@nimo-deck/intelligence`)
-- **Adapter-Based AI Gateway:** Unified client supporting OpenRouter, Google Gemini, Anthropic Claude, OpenAI, and local endpoints (Ollama).
-- **Codebase Context Extractor:** Extracts AST summaries, directory trees, `package.json`/`Cargo.toml` dependencies, and commit log patterns.
-- **Cognitive Engines:**
-  - *Project Summarizer:* Synthesizes high-level architecture narratives.
-  - *Tech Debt & Bug Detector:* Spots common anti-patterns, missing tests, and outdated dependencies.
-  - *Roadmap Planner:* Generates prioritized feature roadmaps with complexity ratings and dependencies.
-- **Strict Fact vs. Hypothesis Separation:** Outputs explicit categorizations (`VERIFIED_FACT` vs `AI_HYPOTHESIS`) to ensure users never confuse deterministic analysis with probabilistic assumptions.
+- **Multi-Provider AI Adapters & Registry (`ProviderRegistry`):** Provider-agnostic gateway supporting OpenRouter (`OpenRouterAdapter`), Google Gemini (`GeminiAdapter`), OpenAI (`OpenAIAdapter`), Anthropic Claude (`ClaudeAdapter`), and local Ollama (`OllamaAdapter`). Provides automated retry with exponential backoff, graceful fallback chains, token tracking, and per-model cost estimation (`CostEstimator`).
+- **Security & Privacy Defense:**
+  - *Secret Redaction (`SecretRedactor`):* Masks API keys, tokens, and high-entropy private keys with `[REDACTED_SECRET]` prior to prompt generation.
+  - *Prompt Injection Guard (`PromptInjectionGuard`):* Neutralizes instruction overrides, DAN exploits, and XML delimiter escapes inside untrusted repository files, wrapping context in isolated boundaries.
+  - *Privacy Policy (`PrivacyGuard`):* Enforces project-level opt-in / opt-out and local-only offline inference (Ollama-only mode); provides pre-transmission previews.
+- **Codebase Ingestion & AST Extraction:**
+  - *Repo Scanner (`RepoScanner`):* Recursive discovery strictly excluding `.git`, `node_modules`, `dist`, `.env`, and immutable patterns.
+  - *Incremental Indexing (`ContentHashCache`):* SHA-256 fingerprint caching skipping unchanged files between runs.
+  - *AST Extraction (`ASTExtractor`):* TypeScript compiler API parsing of classes, functions, interfaces, line ranges, cyclomatic complexity, and export lists.
+  - *Manifest & Test Analyzers:* Ingests `package.json` dependencies, devDependencies, and scripts; identifies untested source modules.
+  - *Context Packing (`ContextPacker`):* Assembles topology, manifests, docs, AST, and tests into a token-budget-governed prompt payload.
+- **Fact vs. Hypothesis Engine (`FactHypothesisEngine`):** Strictly enforces epistemic grounding by verifying that `VERIFIED_FACT` items cite concrete files, symbols, manifests, or commits on disk. Unverifiable claims are demoted to `AI_HYPOTHESIS`.
+- **Recommendation Lifecycle & Issue Converter:** Generates structured recommendations and multi-phase roadmaps via Zod schemas (`RecommendationGenerator`). Converts `ACCEPTED` recommendations into GitHub issues (`GitHubIssueConverter`) with explicit user confirmation.
+- **Persistent Project Memory (`ProjectMemoryManager`):** Synthesizes and maintains long-term project understanding (purpose, architecture, implemented features, historical decisions, known limitations, current state) in SQLite linked to repository commit SHAs.
+- **Cross-Project Intelligence (`CrossProjectAnalyzer`):** Analyzes multi-project relationships, detecting shared dependencies, duplicated symbols for extraction into shared libraries, and licensing compatibility.
 
 ### 4.6 DECK VAULT (`@nimo-deck/vault`)
 - **Immutable Audit Trail:** Logs all Git actions, Google Drive uploads, and AI operations into a hash-chained, append-only SQLite log.

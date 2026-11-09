@@ -271,6 +271,33 @@ export class GitHubClient {
   }
 
   /**
+   * Creates a new issue in a repository.
+   */
+  async createIssue(
+    owner: string,
+    repo: string,
+    data: { title: string; body: string; labels?: string[] }
+  ): Promise<GitHubIssue> {
+    const raw = await this.request<RawIssuePayload>(`/repos/${owner}/${repo}/issues`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+
+    return {
+      id: raw.id,
+      number: raw.number,
+      title: raw.title,
+      state: raw.state === 'closed' ? 'closed' : 'open',
+      author: raw.user?.login || 'unknown',
+      htmlUrl: raw.html_url,
+      labels: (raw.labels || []).map((l) => (typeof l === 'string' ? l : l.name || '')),
+      commentsCount: raw.comments || 0,
+      createdAt: raw.created_at,
+      updatedAt: raw.updated_at
+    };
+  }
+
+  /**
    * Compares two commits or branch heads.
    */
   async compareCommits(

@@ -119,9 +119,12 @@ erDiagram
         string id PK "UUIDv4"
         string project_id FK
         string model_used "e.g. anthropic/claude-3.5-sonnet"
+        string commit_sha "Git commit hash"
+        string prompt_version "Prompt version identifier"
         string summary_markdown
         string tech_debt_report
         string security_report
+        string token_usage_json "Prompt, completion, total, and cost"
         datetime created_at
     }
 
@@ -136,7 +139,35 @@ erDiagram
         string reasoning
         string expected_benefits
         string dependencies_json
-        string status "PROPOSED | ACCEPTED | REJECTED | RESOLVED"
+        string status "PENDING | PROPOSED | ACCEPTED | REJECTED | RESOLVED | IMPLEMENTED | DEFERRED"
+        string evidence "File path, symbol, or manifest evidence"
+        string risks_json
+        string acceptance_criteria_json
+        datetime created_at
+    }
+
+    PROJECT_MEMORIES {
+        string id PK "UUIDv4"
+        string project_id FK
+        string commit_sha "Repository version"
+        string purpose "Core project mission"
+        string architecture "High-level architecture narrative"
+        string implemented_features_json
+        string historical_decisions_json
+        string known_limitations_json
+        string current_state
+        string future_opportunities_json
+        datetime updated_at
+    }
+
+    CROSS_PROJECT_INSIGHTS {
+        string id PK "UUIDv4"
+        string title
+        string type "SHARED_PACKAGE | REUSABLE_MODULE | ARCHITECTURE_SIMILARITY | DEPENDENCY_OVERLAP | INTEGRATION_OPPORTUNITY"
+        string project_ids_json
+        string description
+        string recommendation
+        string licensing_notes
         datetime created_at
     }
 

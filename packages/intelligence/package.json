@@ -1,0 +1,25 @@
+{
+  "name": "@nimo-deck/intelligence",
+  "version": "0.1.0",
+  "description": "Provider-agnostic AI intelligence engine, AST codebase understanding, project memory, fact vs hypothesis separation, and cross-project analysis for NIMO-DECK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
+  },
+  "dependencies": {
+    "@nimo-deck/core": "*",
+    "@nimo-deck/github": "*",
+    "@nimo-deck/shared": "*",
+    "typescript": "~5.7.3",
+    "zod": "^3.24.2"
+  }
+}

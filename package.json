@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint packages/**/src/**/*.ts",
-    "typecheck": "tsc -b packages/shared packages/core packages/sync packages/github packages/drive",
+    "typecheck": "tsc -b packages/shared packages/core packages/sync packages/github packages/drive packages/intelligence",
     "clean": "node -e \"const fs = require('fs'); ['dist', 'build', '.turbo'].forEach(d => fs.rmSync(d, { recursive: true, force: true }));\""
   },
   "repository": {

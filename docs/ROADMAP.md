@@ -139,33 +139,45 @@ Implement Google Drive v3 OAuth 2.0 PKCE integration, non-conflicting snapshot g
 ---
 
 ### Phase 5: AI Project Intelligence Engine (`@nimo-deck/intelligence`)
-**Status:** `[PENDING - NEXT]`
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
 **Primary Objectives:**
-Build a multi-provider LLM gateway, AST and project context extraction pipeline, structured cognitive outputs, and the Fact vs. Hypothesis engine.
+Build a provider-agnostic LLM gateway, AST and project context extraction pipeline, structured cognitive outputs, persistent project memory, cross-project analysis, and the Fact vs. Hypothesis engine.
 
-- **Tasks:**
-  1. Build `AIProviderAdapter` interface with implementations:
-     - OpenRouter (Default gateway).
-     - Google Gemini (Direct API).
-     - OpenAI & Anthropic (Direct APIs).
-     - Ollama (Local offline model).
-  2. Implement `ContextExtractor`:
-     - Directory tree serializer.
-     - Dependency manifest parser (`package.json`, `Cargo.toml`, etc.).
-     - README and markdown extractor.
-     - Git commit history analyzer.
-  3. Implement cognitive analysis pipelines:
-     - Project summary & architectural pattern recognition.
-     - Technical debt & security vulnerability audit.
-     - Dynamic roadmap synthesizer with complexity & dependencies.
-  4. Implement `FactHypothesisClassifier`:
-     - Enforces deterministic tagging (`VERIFIED_FACT` vs `AI_HYPOTHESIS`).
+- **Tasks Completed:**
+  - [x] Implemented modular provider adapters: `OpenRouterAdapter`, `GeminiAdapter`, `OpenAIAdapter`, `ClaudeAdapter`, and `OllamaAdapter` with zero-cost local inference.
+  - [x] Implemented `ProviderRegistry` with exponential backoff retries, capability detection, model selection, token usage tracking, and automatic graceful fallback.
+  - [x] Implemented `CostEstimator` with per-model pricing estimates across OpenAI, Anthropic, Gemini, OpenRouter, and Ollama.
+  - [x] Implemented `SecretRedactor` scanning code buffers with regexes and Shannon entropy, masking secrets with `[REDACTED_SECRET]` before external transmission.
+  - [x] Implemented `PromptInjectionGuard` neutralizing instruction overrides, DAN exploits, and XML tag escapes inside untrusted repository inputs.
+  - [x] Implemented `PrivacyGuard` enforcing project opt-in / opt-out (`ai_analysis_enabled`) and local-only restrictions (Ollama-only mode); provides pre-transmission previews.
+  - [x] Implemented `RepoScanner` with recursive filesystem traversal, strictly excluding `.git`, `node_modules`, `dist`, `.env`, and immutable patterns.
+  - [x] Implemented `ContentHashCache` providing file-level SHA-256 caching and incremental codebase diffing to avoid re-parsing unchanged files.
+  - [x] Implemented `ASTExtractor` via TypeScript compiler API extracting exported classes, functions, interfaces, line ranges, cyclomatic complexity, and exports.
+  - [x] Implemented `ManifestAnalyzer`, `DocExtractor`, `TestStructureAnalyzer`, and `GitHistoryAnalyzer` extracting project dependencies, specs, test coverage gaps, and commit churn.
+  - [x] Implemented `ContextPacker` assembling project topology, manifests, docs, AST, and tests into a token-budget-managed prompt payload.
+  - [x] Implemented `FactHypothesisEngine` validating that `VERIFIED_FACT` recommendations cite concrete files, symbols, manifests, or commits on disk, demoting unevidenced claims to `AI_HYPOTHESIS`.
+  - [x] Implemented `RecommendationGenerator` prompting models for structured analyses, recommendations, and roadmaps with Zod schema validation.
+  - [x] Implemented `GitHubIssueConverter` converting `ACCEPTED` recommendations into GitHub issues via `@nimo-deck/github` with explicit user confirmation.
+  - [x] Implemented `ProjectMemoryManager` tracking long-term project understanding (purpose, architecture, implemented features, historical decisions, known limitations, current state) in SQLite linked to repository commit SHAs.
+  - [x] Implemented `CrossProjectAnalyzer` comparing multiple repositories to discover shared dependencies, repeated symbols for shared package extraction, and licensing compatibility.
+  - [x] Implemented `DeckIntelligenceEngine` central facade coordinating scanning, incremental caching, provider dispatch, persistence, and event emission.
 - **Verification Gate:**
-  - Mocked LLM responses validated against Zod schemas ensuring no hallucinated or unformatted fields.
+  - [x] 100% test pass rate: 35 test suites, 103 unit and integration tests passing (`npm test`).
+  - [x] All 5 provider adapters verified with mocked network calls and capability assertions.
+  - [x] Graceful provider fallback verified: failing primary triggers secondary provider seamlessly.
+  - [x] Secret redaction and prompt injection neutralization verified.
+  - [x] Fact vs. Hypothesis grounding verified: unevidenced facts demoted to hypotheses.
+  - [x] GitHub issue converter verified: rejects unconfirmed or non-accepted recommendations.
+  - [x] Incremental analysis verified: unchanged projects skip re-running AI inference.
+  - [x] Cross-project analysis verified: detects shared dependencies and reusable modules.
+  - [x] Zero TypeScript errors: `npm run typecheck` across all 6 project references (`shared`, `core`, `sync`, `github`, `drive`, `intelligence`).
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Clean build: `npm run build` compiling clean `.d.ts` declaration maps and `.js` code across all workspaces.
 
 ---
 
 ### Phase 6: Vault, Audit Logs & Disaster Recovery (`@nimo-deck/vault`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Provide an immutable, tamper-evident audit log and lightweight local diff snapshot recovery.
 

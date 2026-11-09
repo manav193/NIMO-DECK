@@ -8,5 +8,6 @@ export * from './repositories/commit-history-repository.js';
 export * from './repositories/audit-log-repository.js';
 export * from './repositories/remote-sync-state-repository.js';
 export * from './repositories/ai-analysis-repository.js';
+export * from './repositories/project-memory-repository.js';
 export * from './events/event-bus.js';
 export * from './security/credential-store.js';
