@@ -1,0 +1,21 @@
+{
+  "name": "@nimo-deck/shared",
+  "version": "0.1.0",
+  "description": "Shared contracts, schemas, cryptographic helpers, and constants for NIMO-DECK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  }
+}

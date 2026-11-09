@@ -31,26 +31,35 @@ gantt
 ## 2. Detailed Phase Breakdown
 
 ### Phase 1: Monorepo Foundation & Core Infrastructure
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
+
 **Primary Objectives:**
 Establish the monorepo structure, TypeScript configuration, package boundary definitions, shared schemas, cryptographic utilities, and embedded SQLite database engine.
 
-- **Tasks:**
-  1. Configure `package.json` workspaces for `@nimo-deck/{shared,core,sync,github,drive,intelligence,vault,dashboard}`.
-  2. Implement `@nimo-deck/shared`:
-     - Common Zod schemas (Project, SyncConfig, CommitHistory, Recommendation).
-     - Cryptographic helpers (Shannon entropy calculator, SHA-256 fingerprinting).
-     - Typed IPC protocol and standard response envelope.
-  3. Implement `@nimo-deck/core`:
-     - SQLite database connection manager via Drizzle ORM.
-     - Database migration runner.
-     - Central EventBus (`EventEmitter3`).
-     - Configuration manager with `keytar` secure credential storage.
+- **Tasks Completed:**
+  - [x] Configure root `package.json` with npm workspaces (`packages/*`), TypeScript 5.7, ESLint 9, and Vitest.
+  - [x] Implement `@nimo-deck/shared`:
+    - [x] Common Zod schemas (`Project`, `SyncConfig`, `CommitRecord`, `RemoteSyncState`, `DriveBackup`, `AIRecommendation`, `AIAnalysis`, `AIRoadmap`, `AuditLogEntry`).
+    - [x] Cryptographic utilities: Shannon entropy calculation, high-confidence secret detection regexes, SHA-256 payload hashing, tamper-evident audit hash-chain calculator.
+    - [x] Immutable ignore patterns (`IMMUTABLE_IGNORED_PATTERNS`, `isImmutableIgnored`).
+    - [x] Typed IPC request, response, error envelopes and standard channel constants.
+  - [x] Implement `@nimo-deck/core`:
+    - [x] Embedded SQLite connection with Drizzle ORM, WAL journal mode, and foreign key enforcement.
+    - [x] Idempotent migration runner (`runMigrations`) creating 11 core tables and composite indexes.
+    - [x] Clean architecture repositories: `ProjectRepository`, `SyncConfigRepository`, `SyncEventRepository`, `CommitHistoryRepository`, `RemoteSyncStateRepository`, `AIAnalysisRepository`.
+    - [x] Cryptographic `AuditLogRepository` with SHA-256 hash chaining and automated tamper-detection validator (`verifyChainIntegrity`).
+    - [x] Typed event bus (`DeckEventBus` using `EventEmitter3`).
+    - [x] Credential store abstraction (`CredentialStore`, `InMemoryCredentialStore`).
 - **Verification Gate:**
-  - Automated tests verifying database migrations, CRUD operations, entropy calculations, and type checks across all workspaces.
+  - [x] 100% test pass rate: 7 test suites, 29 unit and integration tests passing (`npm test`).
+  - [x] Zero TypeScript errors: `npm run typecheck` across all project references.
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Package builds: `npm run build` compiles clean `.d.ts` declaration maps and `.js` bundles.
 
 ---
 
 ### Phase 2: Local Git Engine & Background Sync Daemon (`@nimo-deck/sync`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Implement filesystem observation, event debouncing, pre-commit secret scanning, Git CLI automation, conventional commit generation, and safe push/pull logic.
 
