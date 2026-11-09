@@ -9,6 +9,31 @@
     "start": "electron ./dist/main/main.js",
     "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
   },
+  "build": {
+    "appId": "io.github.manav193.nimodeck",
+    "productName": "NIMO-DECK",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    }
+  },
   "dependencies": {
     "@nimo-deck/core": "*",
     "@nimo-deck/dashboard": "*",

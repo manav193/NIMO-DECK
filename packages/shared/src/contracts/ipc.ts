@@ -99,6 +99,22 @@ export const IPCChannels = {
   ONBOARDING_DISCOVER_PROJECTS: 'onboarding:discoverProjects',
   ONBOARDING_COMPLETE: 'onboarding:complete',
 
+  // Workspace Discovery
+  WORKSPACE_SCAN: 'workspace:scan',
+  WORKSPACE_IMPORT_BATCH: 'workspace:importBatch',
+
+  // Device & Multi-Device Federation
+  DEVICE_GET_CURRENT: 'device:getCurrent',
+  DEVICE_LIST_REGISTERED: 'device:listRegistered',
+  DEVICE_PAIR_REQUEST: 'device:pairRequest',
+  DEVICE_REVOKE: 'device:revoke',
+  DEVICE_SYNC_CLOUD: 'device:syncCloud',
+
+  // App Lifecycle & Updates
+  APP_CHECK_UPDATES: 'app:checkUpdates',
+  APP_GET_LOGS: 'app:getLogs',
+  APP_RESTART: 'app:restart',
+
   // Push notifications / events from Main to Renderer
   EVENT_SYNC_STATE_CHANGED: 'event:syncStateChanged',
   EVENT_ALERT_RAISED: 'event:alertRaised',

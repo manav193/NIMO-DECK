@@ -1,0 +1,20 @@
+{
+  "name": "@nimo-deck/cloud-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NIMO-DECK Hosted Cloud Control Plane & Multi-Device Federation Server",
+  "main": "./dist/server.js",
+  "scripts": {
+    "build": "tsc -b",
+    "start": "node ./dist/server.js",
+    "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
+  },
+  "dependencies": {
+    "@nimo-deck/shared": "*",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "typescript": "~5.7.3"
+  }
+}

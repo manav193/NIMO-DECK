@@ -220,11 +220,49 @@ export class IPCGateway {
       };
     });
 
-    // Onboarding
+    // Onboarding & Workspace Discovery
     this.handle(IPCChannels.ONBOARDING_DISCOVER_PROJECTS, async () => {
       return [
         { path: 'C:\\Users\\manav\\OneDrive\\NIMO-DECK', name: 'NIMO-DECK', isGitRepo: true, selected: true }
       ];
+    });
+
+    this.handle(IPCChannels.WORKSPACE_SCAN, async (payload) => {
+      const config = payload as { rootDir: string; maxDepth?: number; customExclusions?: string[] };
+      return this.runtime.workspaceService.scanWorkspace(config);
+    });
+
+    this.handle(IPCChannels.WORKSPACE_IMPORT_BATCH, async (payload) => {
+      const p = payload as { items: Array<{ path: string; name: string; gitRemoteUrl?: string }> };
+      return this.runtime.workspaceService.importBatch(p.items);
+    });
+
+    // Multi-Device Federation
+    this.handle(IPCChannels.DEVICE_GET_CURRENT, async () => {
+      return {
+        id: 'local-device',
+        name: 'Primary Workstation',
+        deviceType: 'DESKTOP_WINDOWS',
+        status: 'ACTIVE',
+        isCurrent: true
+      };
+    });
+
+    this.handle(IPCChannels.DEVICE_LIST_REGISTERED, async () => {
+      return this.runtime.deviceRepo.listAll();
+    });
+
+    this.handle(IPCChannels.DEVICE_SYNC_CLOUD, async () => {
+      return this.runtime.cloudFederation.buildOutboundSyncPayload();
+    });
+
+    // App Lifecycle, Updates & Logs
+    this.handle(IPCChannels.APP_CHECK_UPDATES, async () => {
+      return this.runtime.updateManager.checkForUpdates();
+    });
+
+    this.handle(IPCChannels.APP_GET_LOGS, async () => {
+      return this.runtime.logger.getRecentLogs(100);
     });
 
     // Notifications

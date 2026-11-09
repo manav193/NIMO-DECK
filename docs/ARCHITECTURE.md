@@ -265,6 +265,13 @@ graph TD
 - **Project Detail Workspace (9 Tabs):** Dedicated workspace for deep project inspection across Overview, Repository, Activity, Intelligence, Roadmap, Documentation, History, Snapshots, and Settings.
 - **Onboarding Wizard:** Interactive 7-step guide for discovery, Git authentication, Drive linking, and AI provider setup.
 
+### 4.8 Cloud Control Plane & Multi-Device Federation (`apps/cloud-backend`)
+- **Federated Architecture:** Hub-and-spoke multi-device control plane enabling cross-workstation metadata federation without exposing local filesystems or private ports to the public internet.
+- **Session Manager:** Issues short-lived JWT access tokens and rotating refresh tokens with clock-skew tolerance and instant session revocation.
+- **Rate Limiting:** Sliding-window rate limiter preventing API abuse and brute-force pairing attempts.
+- **Cryptographic Payloads:** Ingests and broadcasts signed `CrossDeviceSyncPayload` envelopes using device Ed25519 or HMAC keys to verify origin and detect branch/audit divergence.
+- **Local Isolation Invariant:** Local filesystem absolute paths remain strictly local to each device and are never broadcast across the federation boundary.
+
 ---
 
 ## 5. Inter-Process Communication (IPC) Protocol

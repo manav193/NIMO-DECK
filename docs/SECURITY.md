@@ -145,3 +145,20 @@ NIMO-DECK enforces programmatic locks on all high-risk Git and filesystem comman
 | `git reset --hard` | **STRICTLY FORBIDDEN** | Disabled; replaced with nondestructive stash/checkout |
 | `git clean -fd` | **STRICTLY FORBIDDEN** | Disabled in all automated workflows |
 | Google Drive Overwrite | **STRICTLY FORBIDDEN** | Every snapshot is a new timestamped version |
+
+---
+
+## 8. Multi-Device & Logging Security (Phase 8 Hardening)
+
+### 8.1 Production Logging Redaction
+All structured log output produced by `ProductionLogger` automatically scrubs sensitive strings before writing to disk or stdout:
+- GitHub PATs (`ghp_*`, `github_pat_*`)
+- AI provider tokens (`sk-*`, `AIza*`)
+- Bearer tokens in HTTP headers (`Bearer ...`)
+- Explicit secret JSON keys (`client_secret`, `apiKey`, `password`, `privateKey`)
+
+### 8.2 Multi-Device Isolation Invariant
+- **Zero Local Path Transmission:** Absolute local filesystem paths (e.g. `C:\Users\manav\OneDrive\...`) exist only on the originating machine and are never transmitted in cross-device synchronization payloads.
+- **Zero Public Port Exposure:** Workstations run with zero inbound public listening ports, communicating outbound-only via TLS 1.3 to GitHub, Google Drive, and the Cloud Control Plane.
+- **Cryptographic Signatures:** Every outbound metadata synchronization payload is signed using the workstation's device keypair to prevent tampering.
+- **Sliding-Window Rate Limiting:** The cloud control plane enforces sliding-window IP rate limiting (120 req/min) to prevent brute-force attacks on pairing and auth endpoints.

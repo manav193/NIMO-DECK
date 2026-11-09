@@ -10,16 +10,23 @@ import {
   ProjectMemoryRepository,
   AuditLogRepository,
   VaultRepository,
+  DeviceRepository,
+  ProductionLogger,
+  WorkspaceOnboardingService,
+  CloudFederationService,
   DeckEventBus,
   type DeckDatabase
 } from '@nimo-deck/core';
 import { DeckVaultEngine } from '@nimo-deck/vault';
 import { DeckIntelligenceEngine, ProviderRegistry } from '@nimo-deck/intelligence';
+import { DaemonManager } from './daemon-lifecycle.js';
+import { AppUpdateManager } from './update-manager.js';
 
 export class DesktopRuntime {
   readonly db: DeckDatabase;
   readonly eventBus: DeckEventBus;
   readonly appDataDir: string;
+  readonly logger: ProductionLogger;
 
   // Repositories
   readonly projectRepo: ProjectRepository;
@@ -28,17 +35,26 @@ export class DesktopRuntime {
   readonly memoryRepo: ProjectMemoryRepository;
   readonly auditRepo: AuditLogRepository;
   readonly vaultRepo: VaultRepository;
+  readonly deviceRepo: DeviceRepository;
 
-  // Engines
+  // Services & Engines
+  readonly workspaceService: WorkspaceOnboardingService;
+  readonly cloudFederation: CloudFederationService;
   readonly providerRegistry: ProviderRegistry;
   readonly vaultEngine: DeckVaultEngine;
   readonly intelligenceEngine: DeckIntelligenceEngine;
+  readonly daemonManager: DaemonManager;
+  readonly updateManager: AppUpdateManager;
 
   constructor(customDbPath?: string) {
     this.appDataDir = path.join(os.homedir(), '.nimo-deck');
     if (!fs.existsSync(this.appDataDir)) {
       fs.mkdirSync(this.appDataDir, { recursive: true });
     }
+
+    const logDir = path.join(this.appDataDir, 'logs');
+    this.logger = new ProductionLogger({ logDir, consoleOutput: true });
+    this.logger.info('DesktopRuntime', 'Initializing NIMO-DECK desktop runtime...');
 
     const dbPath = customDbPath || path.join(this.appDataDir, 'nimo-deck.sqlite');
     const conn = createDatabaseConnection({ filePath: dbPath });
@@ -53,6 +69,7 @@ export class DesktopRuntime {
     this.memoryRepo = new ProjectMemoryRepository(this.db);
     this.auditRepo = new AuditLogRepository(this.db);
     this.vaultRepo = new VaultRepository(this.db);
+    this.deviceRepo = new DeviceRepository(this.db);
 
     const vaultDir = path.join(this.appDataDir, 'vault');
     this.vaultEngine = new DeckVaultEngine({
@@ -67,5 +84,22 @@ export class DesktopRuntime {
       registry: this.providerRegistry,
       eventBus: this.eventBus
     });
+
+    this.workspaceService = new WorkspaceOnboardingService(this.projectRepo, this.logger);
+
+    // Register local device
+    const deviceId = os.hostname().toLowerCase();
+    this.cloudFederation = new CloudFederationService(
+      { deviceId },
+      this.deviceRepo,
+      this.projectRepo,
+      this.auditRepo,
+      this.logger
+    );
+
+    this.daemonManager = new DaemonManager(this.db, this.logger);
+    this.daemonManager.setupCrashRecovery();
+
+    this.updateManager = new AppUpdateManager(this.logger);
   }
 }

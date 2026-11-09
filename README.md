@@ -121,13 +121,11 @@ flowchart TB
 ```
 NIMO-DECK/
 ├── .github/                     # GitHub Actions CI/CD workflows
+├── apps/
+│   ├── desktop/                 # Electron desktop application, secure preload & IPC gateway
+│   ├── web/                     # Browser-based command center & API server
+│   └── cloud-backend/           # Hosted control plane & multi-device federation server
 ├── docs/                        # Formal architecture & system specifications
-│   ├── ARCHITECTURE.md          # Complete system architecture & dataflow
-│   ├── ROADMAP.md               # Phase-wise engineering milestones & tests
-│   ├── DATABASE.md              # Database schemas (SQLite & PostgreSQL)
-│   ├── SECURITY.md              # Threat model (STRIDE) & secret defense
-│   ├── SYNC-ENGINE.md           # Git monitoring, debounce & merge state machines
-│   └── AI-INTELLIGENCE.md       # AI ingestion, adapters, & prompt engineering
 ├── packages/
 │   ├── core/                    # Core orchestration & lifecycle service
 │   ├── sync/                    # File watcher & Git synchronization daemon
@@ -135,8 +133,9 @@ NIMO-DECK/
 │   ├── drive/                   # Google Drive OAuth & snapshot backup engine
 │   ├── intelligence/            # Multi-provider LLM analysis engine
 │   ├── vault/                   # History vault, audit logs & recovery manager
-│   ├── dashboard/               # Electron main + React 19 UI renderer
+│   ├── dashboard/               # Shared React 19 UI, design system & transport contracts
 │   └── shared/                  # Common TypeScript types, Zod schemas & utils
+├── tests/                       # End-to-end acceptance & security penetration test suites
 ├── package.json                 # Monorepo root configuration (npm workspaces)
 ├── tsconfig.base.json           # Base TypeScript configuration
 ├── .gitignore                   # Enterprise ignore rules
@@ -149,6 +148,15 @@ NIMO-DECK/
 
 Explore the detailed architecture specifications in the `docs/` directory:
 
+- 🚀 [**Production & Hardening (docs/PRODUCTION.md)**](docs/PRODUCTION.md): Production lifecycle, Windows packaging, logger, and classification audit.
+- 🌐 [**Multi-Device Federation (docs/MULTI-DEVICE.md)**](docs/MULTI-DEVICE.md): Device registration, cryptographic signatures, and network security boundaries.
+- 📦 [**Deployment Guide (docs/DEPLOYMENT.md)**](docs/DEPLOYMENT.md): Building Windows installers (.exe), web containerization, and cloud deployment.
+- 💻 [**Installation Guide (docs/INSTALLATION.md)**](docs/INSTALLATION.md): Step-by-step setup, directory layout, and upgrade procedures.
+- ✅ [**Acceptance & Security Tests (docs/ACCEPTANCE-TESTS.md)**](docs/ACCEPTANCE-TESTS.md): 14-step end-to-end lifecycle verification and security test results.
+- 🎛️ [**Dashboard System (docs/DASHBOARD.md)**](docs/DASHBOARD.md): React 19 command center, design system tokens, 11 views, and 9 workspace tabs.
+- 🖥️ [**Desktop Architecture (docs/DESKTOP.md)**](docs/DESKTOP.md): Electron main process, context-isolated preload, and IPC gateway.
+- 🌐 [**Web Application (docs/WEB-APPLICATION.md)**](docs/WEB-APPLICATION.md): Browser dashboard, authenticated JSON-RPC transport, and standalone mode.
+- 🔐 [**Vault & Recovery (docs/VAULT.md)**](docs/VAULT.md): Content-addressed storage (CAS), cryptographic SHA-256 audit chaining, and disaster recovery.
 - 📐 [**System Architecture (docs/ARCHITECTURE.md)**](docs/ARCHITECTURE.md): Deep-dive into C4 diagrams, inter-process communication, and modular adapter patterns.
 - 🔄 [**Sync Engine Specification (docs/SYNC-ENGINE.md)**](docs/SYNC-ENGINE.md): Chokidar grouping algorithms, commit debouncing, conflict resolution, and health diagnostics.
 - 🗄️ [**Database & State Management (docs/DATABASE.md)**](docs/DATABASE.md): SQLite edge database and PostgreSQL hybrid schema definitions with Drizzle ORM.

@@ -237,3 +237,33 @@ export const vaultChangelogs = sqliteTable('vault_changelogs', {
   aiNarrative: text('ai_narrative'),
   generatedAt: integer('generated_at', { mode: 'timestamp_ms' }).notNull()
 });
+
+export const devices = sqliteTable('devices', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  fingerprint: text('fingerprint', { length: 64 }).notNull().unique(),
+  deviceType: text('device_type', {
+    enum: ['DESKTOP_WINDOWS', 'DESKTOP_MACOS', 'DESKTOP_LINUX', 'LAPTOP', 'MOBILE', 'CLOUD_RUN']
+  }).notNull(),
+  status: text('status', {
+    enum: ['ACTIVE', 'OFFLINE', 'REVOKED', 'PENDING_PAIRING']
+  }).default('ACTIVE').notNull(),
+  publicKey: text('public_key').notNull(),
+  clientVersion: text('client_version').default('0.1.0').notNull(),
+  ipAddress: text('ip_address'),
+  lastSeenAt: integer('last_seen_at', { mode: 'timestamp_ms' }),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const deviceSyncStates = sqliteTable('device_sync_states', {
+  id: text('id').primaryKey(),
+  deviceId: text('device_id')
+    .references(() => devices.id, { onDelete: 'cascade' })
+    .notNull(),
+  projectId: text('project_id')
+    .references(() => projects.id, { onDelete: 'cascade' })
+    .notNull(),
+  lastSyncedAuditSeq: integer('last_synced_audit_seq').default(0).notNull(),
+  lastSyncedHeadSha: text('last_synced_head_sha'),
+  syncedAt: integer('synced_at', { mode: 'timestamp_ms' }).notNull()
+});

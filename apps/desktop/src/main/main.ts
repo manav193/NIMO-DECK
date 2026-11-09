@@ -75,11 +75,39 @@ function createWindow(): void {
 app.whenReady().then(() => {
   createWindow();
 
+  // Desktop startup integration (Windows login item setting)
+  try {
+    if (process.platform === 'win32') {
+      const loginSettings = app.getLoginItemSettings();
+      if (!loginSettings.openAtLogin && process.env.NODE_ENV === 'production') {
+        app.setLoginItemSettings({
+          openAtLogin: true,
+          openAsHidden: true
+        });
+      }
+    }
+  } catch {
+    // Ignore in non-packaged dev environment
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
+});
+
+let isQuitting = false;
+app.on('before-quit', async (event) => {
+  if (!isQuitting && runtime) {
+    event.preventDefault();
+    isQuitting = true;
+    try {
+      await runtime.daemonManager.gracefulShutdown();
+    } finally {
+      app.quit();
+    }
+  }
 });
 
 app.on('window-all-closed', () => {

@@ -236,6 +236,37 @@ CREATE TABLE IF NOT EXISTS vault_changelogs (
   generated_at INTEGER NOT NULL,
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
+
+-- 16. Multi-Device Registry
+CREATE TABLE IF NOT EXISTS devices (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  fingerprint TEXT NOT NULL UNIQUE,
+  device_type TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK(status IN ('ACTIVE', 'OFFLINE', 'REVOKED', 'PENDING_PAIRING')),
+  public_key TEXT NOT NULL,
+  client_version TEXT NOT NULL DEFAULT '0.1.0',
+  ip_address TEXT,
+  last_seen_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_devices_fingerprint ON devices(fingerprint);
+CREATE INDEX IF NOT EXISTS idx_devices_status ON devices(status);
+
+-- 17. Device Sync State
+CREATE TABLE IF NOT EXISTS device_sync_states (
+  id TEXT PRIMARY KEY,
+  device_id TEXT NOT NULL,
+  project_id TEXT NOT NULL,
+  last_synced_audit_seq INTEGER NOT NULL DEFAULT 0,
+  last_synced_head_sha TEXT,
+  synced_at INTEGER NOT NULL,
+  FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_device_sync_composite ON device_sync_states(device_id, project_id);
 `;
 
 /**

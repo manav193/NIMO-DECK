@@ -8,4 +8,6 @@ export * from './schemas/ai.js';
 export * from './schemas/vault.js';
 export * from './schemas/github.js';
 export * from './schemas/dashboard.js';
+export * from './schemas/device.js';
+export * from './schemas/workspace-discovery.js';
 export * from './contracts/ipc.js';
