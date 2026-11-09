@@ -177,21 +177,49 @@ Build a provider-agnostic LLM gateway, AST and project context extraction pipeli
 ---
 
 ### Phase 6: Vault, Audit Logs & Disaster Recovery (`@nimo-deck/vault`)
-**Status:** `[PENDING - NEXT]`
+**Status:** `[COMPLETED]`
 **Primary Objectives:**
-Provide an immutable, tamper-evident audit log and lightweight local diff snapshot recovery.
+Provide an immutable, tamper-evident audit log, content-addressed storage (CAS) differential snapshot engine, fail-safe disaster recovery subsystem, unified developer timeline, and semantic release changelog generator.
 
-- **Tasks:**
-  1. Implement `AuditLogger` with cryptographic SHA-256 hash chaining.
-  2. Implement local delta snapshot manager (temporary git stash patches).
-  3. Build changelog generator from Git commit streams.
-  4. Implement safe rollback coordinator.
+- **Completed Deliverables:**
+  - [x] Defined Zod contracts in `@nimo-deck/shared`: `AuditLogEntrySchema`, `VaultSnapshotSchema`, `VaultSnapshotManifestSchema`, `SnapshotFileEntrySchema`, `RestorePreviewSchema`, `TimelineEventSchema`, `ChangelogRecordSchema`.
+  - [x] Implemented database migrations & Drizzle ORM schemas in `@nimo-deck/core`: `vault_snapshots`, `vault_restore_operations`, `vault_changelogs`, added `sequence_num` and `entry_hash` to `audit_logs`.
+  - [x] Implemented `VaultRepository` with snapshot persistence, retrieval, deletion, restore operation tracking, and changelog storage.
+  - [x] Implemented `BlobStore`: zlib-compressed, SHA-256 content-addressed chunk storage with automatic deduplication across files and snapshot generations.
+  - [x] Implemented `HashChainManager` & `AuditRecorder`: append-only logging linking operations to the preceding entry hash with monotonic sequence numbers, timestamps, and actor attributions (`SYSTEM`, `USER`, `AI_AGENT`).
+  - [x] Implemented `AuditVerifier` & `AuditQueryService`: full-chain cryptographic validation from genesis to head, identifying exact tampered row IDs, breaks in sequence, or altered payloads.
+  - [x] Implemented `SnapshotEngine`: non-destructive working tree and Git state snapshots (committed, staged, unstaged), strictly excluding ignored dependencies (`node_modules`), `.git`, and secrets (`.env`), computing Merkle root digests.
+  - [x] Implemented `SnapshotComparator`: file-level diff sets (added, modified, deleted, identical) between arbitrary snapshot manifests.
+  - [x] Implemented `SafeRestoreEngine`:
+    - Restore preview generation without disk mutations.
+    - Pre-restore safety snapshot capture (`SAFETY_PRE_RESTORE`) before any modifications.
+    - Mandatory user confirmation (`confirmRestore: true`).
+    - Protection against overwriting dirty working tree files (`allowOverwriteUncommitted`) and deleting untracked files (`allowDeletion`).
+    - CAS blob SHA-256 integrity verification before modifying disk.
+    - Path traversal exploit defense (`../` stripping and directory boundary checks).
+    - Automatic rollback to the safety snapshot if disk writes fail.
+  - [x] Implemented `ProjectTimelineService`: multi-source developer timeline aggregating Git commits, sync cycles, Drive backups, AI analyses, snapshots, and audit events with search, type, and date range filters.
+  - [x] Implemented `ChangelogGenerator`: semantic commit categorization (breaking changes, features, fixes, refactoring), AI narrative synthesis, and strict fact vs interpretation tagging (`[VERIFIED_GIT_HISTORY]` vs `[AI_GENERATED_INTERPRETATION]`).
+  - [x] Implemented `VaultRetentionManager`: age-based and count-based snapshot pruning with the strict invariant that the newest verified recovery point and pinned snapshots (`isPinned: true`) are never deleted.
+  - [x] Implemented `DriveVaultIntegration`: bridges local Vault snapshots with DECK DRIVE cloud backups and provides sync comparison diagnostics.
+  - [x] Implemented `DeckVaultEngine`: central coordinator orchestrating all vault subsystems.
 - **Verification Gate:**
-  - Test verifying that any manual tampering with an audit log row invalidates the chain validation check.
+  - [x] 100% test pass rate: 45 test suites, 128 unit and integration tests passing (`npm test`).
+  - [x] Tamper detection verified: tampering with payload or entry hash immediately triggers validation failure identifying tampered ID and index.
+  - [x] Sequence break detection verified: deleting records from the middle of the chain is caught.
+  - [x] Content-addressed deduplication verified: identical files produce `wasNew: false` and share blob chunks.
+  - [x] Non-destructive working tree invariant verified: snapshot creation leaves workspace files unaltered.
+  - [x] Safe restore gates verified: rejects unconfirmed restores or overwriting uncommitted files without explicit flags.
+  - [x] Pre-restore safety snapshot verified: creates rollback point prior to writing files.
+  - [x] Retention invariants verified: last recovery point and pinned snapshots are strictly protected from deletion.
+  - [x] Zero TypeScript errors: `npm run typecheck` across all 7 workspace packages (`shared`, `core`, `sync`, `github`, `drive`, `intelligence`, `vault`).
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Clean build: `npm run build` compiling clean `.d.ts` declaration maps and `.js` code across all 7 workspaces.
 
 ---
 
 ### Phase 7: Modern Desktop & Web Dashboard (`@nimo-deck/dashboard`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Create a modern, responsive, developer-oriented Electron desktop application and web interface using React 19 and Tailwind CSS.
 

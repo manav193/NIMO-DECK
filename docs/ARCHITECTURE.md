@@ -233,9 +233,28 @@ graph TD
 - **Cross-Project Intelligence (`CrossProjectAnalyzer`):** Analyzes multi-project relationships, detecting shared dependencies, duplicated symbols for extraction into shared libraries, and licensing compatibility.
 
 ### 4.6 DECK VAULT (`@nimo-deck/vault`)
-- **Immutable Audit Trail:** Logs all Git actions, Google Drive uploads, and AI operations into a hash-chained, append-only SQLite log.
-- **Differential Snapshots:** Stores lightweight patch sets of local uncommitted workspaces for rollbacks.
-- **Changelog Engine:** Auto-compiles markdown release notes from commit histories.
+- **Cryptographic Audit Engine:**
+  - *Append-Only Audit Recorder (`AuditRecorder`):* Logs operations across Git, Sync, Drive, and Intelligence into the SQLite `audit_logs` table with monotonic sequence numbers, timestamps, and actor attributions (`SYSTEM`, `USER`, `AI_AGENT`).
+  - *SHA-256 Hash Chaining (`HashChainManager`):* Chains each audit record to the preceding entry hash (`prevLogHash`), anchored to a well-known `GENESIS_HASH`.
+  - *Tamper Detection & Verification (`AuditVerifier` & `AuditQueryService`):* Performs full-chain cryptographic validation from genesis to head, pinpointing exact tampered row IDs, breaks in sequence, or altered payloads. Distinguishes tamper-evident logging from hardware-enforced immutability.
+- **Content-Addressed Storage (CAS) & Differential Snapshots:**
+  - *CAS Blob Store (`BlobStore`):* Implements zlib-compressed, SHA-256 content-addressed chunk storage with automatic deduplication across files and snapshot generations.
+  - *Differential Snapshot Engine (`SnapshotEngine`):* Non-destructively captures full and differential snapshots of Git commit references, staged changes, unstaged changes, and untracked files while strictly excluding ignored dependencies (`node_modules`), `.git`, and secrets (`.env`). Computes root Merkle digests for snapshot manifests.
+  - *Snapshot Comparison (`SnapshotComparator`):* Computes file-level diff sets (added, modified, deleted, identical) between arbitrary snapshot manifests.
+- **Fail-Safe Disaster Recovery Engine (`SafeRestoreEngine`):**
+  - *Restore Preview:* Computes precise file operations (create, overwrite, delete, unchanged) prior to disk mutation.
+  - *Pre-Restore Safety Snapshot:* Automatically captures a `SAFETY_PRE_RESTORE` pinned snapshot before any files are modified.
+  - *Safety Gates:* Requires explicit user confirmation (`confirmRestore: true`), blocks overwriting uncommitted changes without explicit approval (`allowOverwriteUncommitted: true`), and prevents unintended file deletions without explicit authorization (`allowDeletion: true`).
+  - *Integrity Verification & Rollback:* Verifies all CAS blob SHA-256 digests before writing. Automatically rolls back to the pre-restore snapshot if any disk write fails or detects path-traversal attacks.
+- **Unified Developer Timeline (`ProjectTimelineService`):**
+  - Synthesizes Git commits, sync cycles, Drive backups, AI analyses, snapshots, and audit events into a chronological developer timeline supporting search, event filtering, and date boundaries.
+- **Release Changelog Generator (`ChangelogGenerator`):**
+  - Categorizes commits into semantic Conventional Commit groups (Breaking Changes, New Features, Bug Fixes, Refactoring).
+  - Synthesizes AI release narratives while strictly labeling sections as `[VERIFIED_GIT_HISTORY]` versus `[AI_GENERATED_INTERPRETATION]`.
+- **Retention & Disaster Recovery Invariants (`VaultRetentionManager`):**
+  - Implements age-based and count-based pruning while enforcing the invariant that the latest recovery point and all pinned snapshots (`isPinned: true`) are never deleted.
+- **Drive-Vault Integration (`DriveVaultIntegration`):**
+  - Bridges local Vault snapshots with DECK DRIVE cloud backups and provides sync comparison diagnostics.
 
 ### 4.7 DECK DASHBOARD (`@nimo-deck/dashboard`)
 - **Electron Shell:** Controls window states, native system tray, notifications, and secure context-isolated IPC channels.

@@ -30,6 +30,7 @@ export class AuditLogRepository {
 
     return {
       id: row.id,
+      sequenceNum: row.sequenceNum ?? undefined,
       projectId: row.projectId,
       actor: row.actor,
       action: row.action,
@@ -48,6 +49,7 @@ export class AuditLogRepository {
   }): AuditLogEntry {
     const latest = this.getLatestEntry();
     const prevLogHash = latest ? latest.entryHash : GENESIS_HASH;
+    const sequenceNum = (latest?.sequenceNum ?? 0) + 1;
 
     const id = crypto.randomUUID();
     const now = new Date();
@@ -64,6 +66,7 @@ export class AuditLogRepository {
 
     const record: typeof auditLogs.$inferInsert = {
       id,
+      sequenceNum,
       projectId: params.projectId || null,
       actor: params.actor as 'SYSTEM' | 'USER' | 'AI_AGENT',
       action: params.action,
@@ -77,6 +80,7 @@ export class AuditLogRepository {
 
     return {
       id,
+      sequenceNum,
       projectId: params.projectId || null,
       actor: params.actor as 'SYSTEM' | 'USER' | 'AI_AGENT',
       action: params.action,
@@ -96,6 +100,7 @@ export class AuditLogRepository {
 
     return rows.map((row) => ({
       id: row.id,
+      sequenceNum: row.sequenceNum ?? undefined,
       projectId: row.projectId,
       actor: row.actor,
       action: row.action,

@@ -181,12 +181,54 @@ erDiagram
 
     AUDIT_LOGS {
         string id PK "UUIDv4"
+        int sequence_num "Monotonic counter"
         string project_id FK
         string actor "SYSTEM | USER | AI_AGENT"
         string action "e.g. GIT_COMMIT, DRIVE_RESTORE"
         string payload_hash "SHA-256 of execution data"
         string prev_log_hash "Cryptographic chain link"
+        string entry_hash "Deterministic entry SHA-256"
         datetime created_at
+    }
+
+    VAULT_SNAPSHOTS {
+        string id PK "UUIDv4"
+        string project_id FK
+        string commit_sha "Git commit SHA"
+        string patch_data "Diff / patch content"
+        string description "Snapshot purpose"
+        string snapshot_type "FULL | INCREMENTAL | DIFFERENTIAL | SAFETY_PRE_RESTORE"
+        string parent_snapshot_id FK
+        string root_hash "Merkle root SHA-256"
+        string manifest_json "Manifest files & hashes"
+        int file_count
+        int size_bytes
+        boolean is_pinned "Protected from pruning"
+        datetime created_at
+    }
+
+    VAULT_RESTORE_OPERATIONS {
+        string id PK "UUIDv4"
+        string project_id FK
+        string snapshot_id FK
+        string safety_snapshot_id "Pre-restore safety checkpoint"
+        string status "PENDING | COMPLETED | ROLLED_BACK | FAILED"
+        string details_json
+        datetime created_at
+    }
+
+    VAULT_CHANGELOGS {
+        string id PK "UUIDv4"
+        string project_id FK
+        string version "Semantic version e.g. v1.1.0"
+        string title
+        string markdown "Formatted release notes"
+        string commit_range "start_sha..end_sha"
+        string features_json
+        string fixes_json
+        string breaking_changes_json
+        string ai_narrative "AI interpretation"
+        datetime generated_at
     }
 ```
 
@@ -290,12 +332,56 @@ export const aiRecommendations = sqliteTable('ai_recommendations', {
 
 export const auditLogs = sqliteTable('audit_logs', {
   id: text('id').primaryKey(),
+  sequenceNum: integer('sequence_num'),
   projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
   actor: text('actor', { enum: ['SYSTEM', 'USER', 'AI_AGENT'] }).notNull(),
   action: text('action').notNull(),
   payloadHash: text('payload_hash').notNull(),
   prevLogHash: text('prev_log_hash').notNull(),
+  entryHash: text('entry_hash', { length: 64 }).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const vaultSnapshots = sqliteTable('vault_snapshots', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  commitSha: text('commit_sha', { length: 40 }),
+  patchData: text('patch_data').notNull(),
+  description: text('description').notNull(),
+  snapshotType: text('snapshot_type', {
+    enum: ['FULL', 'INCREMENTAL', 'DIFFERENTIAL', 'SAFETY_PRE_RESTORE']
+  }).default('FULL').notNull(),
+  parentSnapshotId: text('parent_snapshot_id'),
+  rootHash: text('root_hash', { length: 64 }),
+  manifestJson: text('manifest_json'),
+  fileCount: integer('file_count').default(0).notNull(),
+  sizeBytes: integer('size_bytes').default(0).notNull(),
+  isPinned: integer('is_pinned', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const vaultRestoreOperations = sqliteTable('vault_restore_operations', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  snapshotId: text('snapshot_id').references(() => vaultSnapshots.id, { onDelete: 'cascade' }).notNull(),
+  safetySnapshotId: text('safety_snapshot_id'),
+  status: text('status', { enum: ['PENDING', 'COMPLETED', 'ROLLED_BACK', 'FAILED'] }).notNull(),
+  detailsJson: text('details_json').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const vaultChangelogs = sqliteTable('vault_changelogs', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  version: text('version').notNull(),
+  title: text('title').notNull(),
+  markdown: text('markdown').notNull(),
+  commitRange: text('commit_range'),
+  featuresJson: text('features_json').notNull(),
+  fixesJson: text('fixes_json').notNull(),
+  breakingChangesJson: text('breaking_changes_json').notNull(),
+  aiNarrative: text('ai_narrative'),
+  generatedAt: integer('generated_at', { mode: 'timestamp' }).notNull(),
 });
 ```
 
@@ -309,8 +395,16 @@ To guarantee millisecond query performance on the developer desktop:
 - `idx_sync_events_project_created`: Composite index on `(project_id, created_at DESC)`.
 - `idx_commits_sha`: Index on `commit_history.commit_sha`.
 - `idx_recommendations_status`: Index on `ai_recommendations.status`.
+- `idx_audit_logs_project_seq`: Composite index on `(project_id, sequence_num DESC)`.
+- `idx_vault_snapshots_project_created`: Composite index on `(project_id, created_at DESC)`.
 
 ### 4.2 Audit Log Hash-Chaining
-Every record in `audit_logs` includes `prevLogHash` computed as:
+Every record in `audit_logs` includes `prevLogHash` and `entryHash` computed as:
 $$\text{LogHash}_n = \text{SHA256}(\text{LogHash}_{n-1} + \text{id} + \text{actor} + \text{action} + \text{payloadHash} + \text{createdAt})$$
-This guarantees tamper-evident validation across local Git and Google Drive synchronization history.
+This guarantees tamper-evident validation across local Git, Google Drive synchronization, and disaster recovery operations.
+
+### 4.3 Vault Retention & Disaster Recovery Invariants
+To balance disk storage with recovery safety:
+1. **Latest Recovery Point Invariant:** The most recent snapshot for a project is NEVER deleted, guaranteeing that every registered project always retains at least one verifiable rollback state.
+2. **Pinned Snapshots (`isPinned: true`):** Protected indefinitely from automated age-based or count-based pruning.
+3. **Safety Pre-Restore Checkpoints:** Every consequential restore operation automatically generates a pinned `SAFETY_PRE_RESTORE` snapshot before touching disk files.

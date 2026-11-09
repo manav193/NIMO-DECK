@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS ai_roadmaps (
 -- 12. Audit Logs (Tamper-Evident Hash Chain)
 CREATE TABLE IF NOT EXISTS audit_logs (
   id TEXT PRIMARY KEY,
+  sequence_num INTEGER,
   project_id TEXT,
   actor TEXT NOT NULL CHECK(actor IN ('SYSTEM', 'USER', 'AI_AGENT')),
   action TEXT NOT NULL,
@@ -194,7 +195,45 @@ CREATE TABLE IF NOT EXISTS vault_snapshots (
   commit_sha TEXT,
   patch_data TEXT NOT NULL,
   description TEXT NOT NULL,
+  snapshot_type TEXT NOT NULL DEFAULT 'FULL' CHECK(snapshot_type IN ('FULL', 'INCREMENTAL', 'DIFFERENTIAL', 'SAFETY_PRE_RESTORE')),
+  parent_snapshot_id TEXT,
+  root_hash TEXT,
+  manifest_json TEXT,
+  file_count INTEGER NOT NULL DEFAULT 0,
+  size_bytes INTEGER NOT NULL DEFAULT 0,
+  is_pinned INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_vault_snapshots_project_created ON vault_snapshots(project_id, created_at DESC);
+
+-- 14. Vault Restore Operations
+CREATE TABLE IF NOT EXISTS vault_restore_operations (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  safety_snapshot_id TEXT,
+  status TEXT NOT NULL CHECK(status IN ('PENDING', 'COMPLETED', 'ROLLED_BACK', 'FAILED')),
+  details_json TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (snapshot_id) REFERENCES vault_snapshots(id) ON DELETE CASCADE
+);
+
+-- 15. Vault Changelogs
+CREATE TABLE IF NOT EXISTS vault_changelogs (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  version TEXT NOT NULL,
+  title TEXT NOT NULL,
+  markdown TEXT NOT NULL,
+  commit_range TEXT,
+  features_json TEXT NOT NULL,
+  fixes_json TEXT NOT NULL,
+  breaking_changes_json TEXT NOT NULL,
+  ai_narrative TEXT,
+  generated_at INTEGER NOT NULL,
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 `;
@@ -220,4 +259,12 @@ export function runMigrations(sqlite: Database.Database): void {
   addCol('ai_recommendations', 'evidence', 'TEXT');
   addCol('ai_recommendations', 'risks_json', 'TEXT');
   addCol('ai_recommendations', 'acceptance_criteria_json', 'TEXT');
+  addCol('audit_logs', 'sequence_num', 'INTEGER');
+  addCol('vault_snapshots', 'snapshot_type', "TEXT DEFAULT 'FULL'");
+  addCol('vault_snapshots', 'parent_snapshot_id', 'TEXT');
+  addCol('vault_snapshots', 'root_hash', 'TEXT');
+  addCol('vault_snapshots', 'manifest_json', 'TEXT');
+  addCol('vault_snapshots', 'file_count', 'INTEGER DEFAULT 0');
+  addCol('vault_snapshots', 'size_bytes', 'INTEGER DEFAULT 0');
+  addCol('vault_snapshots', 'is_pinned', 'INTEGER DEFAULT 0');
 }

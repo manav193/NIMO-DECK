@@ -176,6 +176,7 @@ export const aiRoadmaps = sqliteTable('ai_roadmaps', {
 
 export const auditLogs = sqliteTable('audit_logs', {
   id: text('id').primaryKey(),
+  sequenceNum: integer('sequence_num'),
   projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
   actor: text('actor', { enum: ['SYSTEM', 'USER', 'AI_AGENT'] }).notNull(),
   action: text('action').notNull(),
@@ -193,5 +194,46 @@ export const vaultSnapshots = sqliteTable('vault_snapshots', {
   commitSha: text('commit_sha', { length: 40 }),
   patchData: text('patch_data').notNull(),
   description: text('description').notNull(),
+  snapshotType: text('snapshot_type', {
+    enum: ['FULL', 'INCREMENTAL', 'DIFFERENTIAL', 'SAFETY_PRE_RESTORE']
+  })
+    .default('FULL')
+    .notNull(),
+  parentSnapshotId: text('parent_snapshot_id'),
+  rootHash: text('root_hash', { length: 64 }),
+  manifestJson: text('manifest_json'),
+  fileCount: integer('file_count').default(0).notNull(),
+  sizeBytes: integer('size_bytes').default(0).notNull(),
+  isPinned: integer('is_pinned', { mode: 'boolean' }).default(false).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const vaultRestoreOperations = sqliteTable('vault_restore_operations', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .references(() => projects.id, { onDelete: 'cascade' })
+    .notNull(),
+  snapshotId: text('snapshot_id')
+    .references(() => vaultSnapshots.id, { onDelete: 'cascade' })
+    .notNull(),
+  safetySnapshotId: text('safety_snapshot_id'),
+  status: text('status', { enum: ['PENDING', 'COMPLETED', 'ROLLED_BACK', 'FAILED'] }).notNull(),
+  detailsJson: text('details_json').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const vaultChangelogs = sqliteTable('vault_changelogs', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .references(() => projects.id, { onDelete: 'cascade' })
+    .notNull(),
+  version: text('version').notNull(),
+  title: text('title').notNull(),
+  markdown: text('markdown').notNull(),
+  commitRange: text('commit_range'),
+  featuresJson: text('features_json').notNull(),
+  fixesJson: text('fixes_json').notNull(),
+  breakingChangesJson: text('breaking_changes_json').notNull(),
+  aiNarrative: text('ai_narrative'),
+  generatedAt: integer('generated_at', { mode: 'timestamp_ms' }).notNull()
 });
