@@ -6,4 +6,5 @@ export * from './schemas/sync.js';
 export * from './schemas/drive.js';
 export * from './schemas/ai.js';
 export * from './schemas/vault.js';
+export * from './schemas/github.js';
 export * from './contracts/ipc.js';

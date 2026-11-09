@@ -4,7 +4,8 @@ import {
   CreateProjectInputSchema,
   SyncConfigSchema,
   AIRecommendationSchema,
-  AuditLogEntrySchema
+  AuditLogEntrySchema,
+  GitHubRepoSchema
 } from '../src/index.js';
 
 describe('@nimo-deck/shared: Zod Schema Contracts', () => {
@@ -103,5 +104,27 @@ describe('@nimo-deck/shared: Zod Schema Contracts', () => {
 
     const parsed = AuditLogEntrySchema.safeParse(entry);
     expect(parsed.success).toBe(true);
+  });
+
+  it('should validate GitHubRepoSchema and RepositoryInventorySchema', () => {
+    const repo = {
+      id: 12345,
+      name: 'NIMO-DECK',
+      fullName: 'manav193/NIMO-DECK',
+      owner: 'manav193',
+      description: 'Personal Development OS',
+      htmlUrl: 'https://github.com/manav193/NIMO-DECK',
+      cloneUrl: 'https://github.com/manav193/NIMO-DECK.git',
+      defaultBranch: 'main',
+      isPrivate: false,
+      isFork: false,
+      starsCount: 10,
+      forksCount: 2,
+      openIssuesCount: 0,
+      updatedAt: new Date().toISOString(),
+      pushedAt: new Date().toISOString()
+    };
+
+    expect(GitHubRepoSchema.safeParse(repo).success).toBe(true);
   });
 });

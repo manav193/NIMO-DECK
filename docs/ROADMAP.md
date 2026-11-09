@@ -88,22 +88,32 @@ Implement filesystem observation, event debouncing, pre-commit secret scanning, 
 ---
 
 ### Phase 3: GitHub Integration & Remote Orchestration (`@nimo-deck/github`)
-**Status:** `[PENDING - NEXT]`
-**Primary Objectives:**
-Seamlessly integrate GitHub REST and GraphQL APIs for repository discovery, branch tracking, pull requests, issues, and real-time webhook ingestion.
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
 
-- **Tasks:**
-  1. Implement `GitHubAdapter` using Octokit.
-  2. Build repository discovery to match local directory paths with remote GitHub repositories.
-  3. Fetch pull requests, active branches, open issues, and remote commit heads.
-  4. Create local webhook receiver server to capture remote push and PR events.
-  5. Sync remote head SHAs into `remote_sync_states` table.
+**Primary Objectives:**
+Seamlessly integrate GitHub REST API for repository discovery, branch tracking, pull requests, issues, real-time webhook ingestion with replay protection, and repository intelligence inventories.
+
+- **Tasks Completed:**
+  - [x] Implemented `GitHubClient` with secure token resolution from `CredentialStore`, zero token exposure to frontend code, and automatic token redaction in all exceptions and error messages.
+  - [x] Implemented `GitHubRateLimiter` tracking `x-ratelimit-*` headers, computing remaining quota and cooldown delays.
+  - [x] Implemented `RepoUrlParser` parsing and normalizing GitHub HTTPS, SSH, and git:// URLs, enabling protocol-agnostic equivalence matching.
+  - [x] Implemented `RepoMapper` reconciling local projects against discovered remote repositories (detecting mapped pairs, local-only scratch projects, and remote-only repositories).
+  - [x] Implemented `GitHubWebhookHandler` validating incoming webhook signatures via timing-safe HMAC-SHA256 (`X-Hub-Signature-256`) with delivery ID caching to block replay attacks.
+  - [x] Implemented `GitHubMetadataSyncer` synchronizing remote branch heads, open PRs, and issues directly into the local SQLite database (`remote_sync_states`).
+  - [x] Implemented `RepositoryInventoryGenerator` providing repository intelligence, tracking inactive repositories (> 60 days), uncommitted edits, and centralized inventory metrics conforming to `RepositoryInventorySchema`.
 - **Verification Gate:**
-  - Unit tests with mocked GitHub REST/GraphQL responses verifying repository discovery and status reconciliation.
+  - [x] 100% test pass rate: 21 test suites, 68 unit and integration tests passing (`npm test`).
+  - [x] Token redaction verified: error messages redact `ghp_*` tokens with `[REDACTED_TOKEN]`.
+  - [x] Replay attack protection verified: duplicate delivery GUIDs within TTL are blocked.
+  - [x] Timing-safe HMAC-SHA256 validation verified: tampered webhook bodies are rejected.
+  - [x] Zero TypeScript errors: `npm run typecheck` across all project references (`shared`, `core`, `sync`, `github`).
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Clean build: `npm run build` compiling clean `.d.ts` declaration maps and `.js` code across all workspaces.
 
 ---
 
 ### Phase 4: Google Drive Backup & Snapshot System (`@nimo-deck/drive`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Implement Google Drive v3 OAuth 2.0 integration, non-conflicting snapshot generation, SHA-256 fingerprinting, documentation mirroring, and disaster restore engine.
 

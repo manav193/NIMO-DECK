@@ -198,9 +198,13 @@ graph TD
 - **Conflict & Divergence Safeguards:** Detects remote branch divergence before pushing; performs only safe fast-forward merges or stashes uncommitted local modifications.
 
 ### 4.3 DECK GITHUB (`@nimo-deck/github`)
-- **Repository Metadata Sync:** Fetches branch heads, commit histories, tags, pull requests, and issues.
-- **Discovery Engine:** Scans authenticated user or organization accounts on GitHub to auto-link local repositories with remote origins.
-- **Webhook Bridge:** Exposes a local webhook receiver to capture remote push, PR, and issue events in real time.
+- **Direct Authenticated Client (`GitHubClient`):** Lightweight, zero-external-dependency REST client injecting credentials strictly from `CredentialStore`. Enforces token redaction in all exceptions, logs, and telemetry.
+- **Adaptive Rate Limiting (`GitHubRateLimiter`):** Parses `x-ratelimit-*` headers to track quota consumption and prevent API throttling with automatic reset cooldowns.
+- **Protocol-Agnostic URL Parser (`RepoUrlParser`):** Normalizes SSH, HTTPS, and git:// URLs, enabling seamless equality matching regardless of remote protocol configuration.
+- **Local-to-Remote Reconciliation (`RepoMapper`):** Correlates local projects against remote GitHub repositories to identify mapped pairs, local-only scratch projects, and remote-only repositories.
+- **Secure Webhook Ingress (`GitHubWebhookHandler`):** Validates incoming GitHub webhooks (`push`, `pull_request`, `issues`) using timing-safe HMAC-SHA256 signature verification (`X-Hub-Signature-256`) and delivery ID TTL caching to block replay attacks.
+- **Metadata Syncer (`GitHubMetadataSyncer`):** Reconciles remote branch heads, open PRs, and issues directly into the local SQLite database (`remote_sync_states`).
+- **Repository Intelligence Inventory (`RepositoryInventoryGenerator`):** Generates centralized inventories detailing inactive repositories (> 60 days), uncommitted local edits, and open issue/PR metrics.
 
 ### 4.4 DECK DRIVE (`@nimo-deck/drive`)
 - **OAuth 2.0 Handshake:** Secure local loopback authentication with refresh token lifecycle.
