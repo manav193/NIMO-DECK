@@ -1,0 +1,23 @@
+{
+  "name": "@nimo-deck/sync",
+  "version": "0.1.0",
+  "description": "Background filesystem monitoring, Git CLI orchestration, safety guards, and remote synchronization for NIMO-DECK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "node -e \"const fs = require('fs'); fs.rmSync('dist', { recursive: true, force: true });\""
+  },
+  "dependencies": {
+    "@nimo-deck/core": "*",
+    "@nimo-deck/shared": "*",
+    "chokidar": "^4.0.3"
+  }
+}

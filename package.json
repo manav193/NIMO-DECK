@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint packages/**/src/**/*.ts",
-    "typecheck": "tsc -b packages/shared packages/core",
+    "typecheck": "tsc -b packages/shared packages/core packages/sync",
     "clean": "node -e \"const fs = require('fs'); ['dist', 'build', '.turbo'].forEach(d => fs.rmSync(d, { recursive: true, force: true }));\""
   },
   "repository": {
@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
+    "chokidar": "^6.0.0",
     "drizzle-orm": "^0.39.3",
     "eventemitter3": "^5.0.1",
     "zod": "^3.24.2"

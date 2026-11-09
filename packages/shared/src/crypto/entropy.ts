@@ -31,8 +31,8 @@ export const SECRET_SIGNATURE_PATTERNS: RegExp[] = [
   // Private keys
   /-----BEGIN\s+(?:RSA|EC|DSA|OPENSSH|PGP)?\s*PRIVATE KEY-----/,
   // GitHub PATs
-  /ghp_[A-Za-z0-9]{36}/,
-  /github_pat_[A-Za-z0-9_]{82}/,
+  /ghp_[A-Za-z0-9]{30,40}/,
+  /github_pat_[A-Za-z0-9_]{70,90}/,
   // AWS Access Key ID
   /AKIA[0-9A-Z]{16}/,
   // OpenAI & OpenRouter API Keys
@@ -62,6 +62,11 @@ export function isProbableSecret(
   for (const token of tokens) {
     if (token.length >= minTokenLength) {
       const entropy = calculateShannonEntropy(token);
+      // Pure hex string check (max theoretical entropy is 4.0 bits)
+      const isHex = /^[a-f0-9]{32,}$/i.test(token);
+      if (isHex && entropy >= 3.2) {
+        return true;
+      }
       if (entropy >= minEntropy) {
         return true;
       }

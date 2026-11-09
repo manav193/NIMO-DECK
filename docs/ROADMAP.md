@@ -59,31 +59,36 @@ Establish the monorepo structure, TypeScript configuration, package boundary def
 ---
 
 ### Phase 2: Local Git Engine & Background Sync Daemon (`@nimo-deck/sync`)
-**Status:** `[PENDING - NEXT]`
-**Primary Objectives:**
-Implement filesystem observation, event debouncing, pre-commit secret scanning, Git CLI automation, conventional commit generation, and safe push/pull logic.
+**Status:** `[COMPLETED]` (Verified: 2026-11-09)
 
-- **Tasks:**
-  1. Build `ChokidarWatcher` with Windows NTFS debounce stabilization.
-  2. Implement `DebounceBatcher` with sliding quiet window (5s) and max timeout (30s).
-  3. Implement `SafetyFilter`:
-     - Immutable ignore rules enforcement.
-     - Regex secret signature matching.
-     - Shannon entropy threshold checker.
-  4. Build `GitCLI` wrapper:
-     - Argument sanitization array execution (preventing shell injection).
-     - Timeout handling, lockfile (`.git/index.lock`) detection, and clean recovery.
-     - Porcellain status, diff calculation, commit, safe pull (`--ff-only`), and push.
-  5. Build `ConventionalCommitGenerator` heuristic analyzer.
-  6. Implement repository health monitor (detached HEAD, dirty tree, loose objects).
+**Primary Objectives:**
+Implement filesystem observation, event debouncing, pre-commit secret scanning, Git CLI automation, conventional commit generation, safe push/pull logic, and multi-repository background daemon foundation.
+
+- **Tasks Completed:**
+  - [x] Implemented `GitCLI` with safe child process execution (`execFile`), argument array parameterization (zero shell injection), timeout handling, and destructive command interception (`--force`, `-f`, `clean -fd`, `--hard` prohibited).
+  - [x] Implemented `GitStatusInspector` parsing machine-readable `git status --porcelain=v2 --branch` for accurate dirty-tree, branch, untracked, ahead/behind, and conflict tracking.
+  - [x] Implemented `GitDiffInspector` for stat, numstat, and truncated diff summaries for AI prompt window safety.
+  - [x] Implemented `GitLockMonitor` detecting stale `.git/index.lock` files (> 60s mtime) with automated orphan cleanup.
+  - [x] Implemented `DebounceBatcher` with sliding quiet inactivity window (default 5s) and maximum burst ceiling timeout (`maxWaitMs`, default 30s).
+  - [x] Implemented `RepoFileWatcher` wrapping `chokidar.watch` with unconditional immutable ignore rule filtering and pause/resume lifecycle.
+  - [x] Implemented `PreCommitScanner` evaluating candidate files for immutable ignore patterns, 50MB file size limits, credential signatures, and Shannon entropy. Blocks and quarantines secrets before `git add`.
+  - [x] Implemented `CommitMessageService` and `ConventionalCommitBuilder` inferring semantic Conventional Commit messages with monorepo package scope detection, plus an injectable `AICommitMessageGenerator` interface with graceful heuristic fallback.
+  - [x] Implemented `RepoMutex` for in-memory exclusive synchronization locking per repository to prevent race conditions.
+  - [x] Implemented `RetryQueue` providing exponential backoff with randomized jitter for network failures.
+  - [x] Implemented `SyncCoordinator` linking mutex locks, stale lock pruning, safety scanning, staging, committing, database recording, safe pull (`--ff-only`), conflict alerting, and event emission.
+  - [x] Implemented `SyncDaemonManager` orchestrating multi-repository background surveillance with start/stop/pause/resume and manual sync triggers.
 - **Verification Gate:**
-  - Mock filesystem integration test simulating bursts of 1,000 file writes coalesced into a single atomic commit.
-  - Test verifying `.env` and high-entropy private keys are blocked from staging.
-  - Test verifying non-linear history divergence pauses auto-push and alerts user.
+  - [x] 100% test pass rate: 14 test suites, 52 unit and integration tests passing (`npm test`).
+  - [x] Pre-commit security verification: `.env` and high-entropy private keys quarantined and blocked from staging.
+  - [x] Non-linear history divergence alert: automatic push halted on divergence without silent rebase.
+  - [x] Zero TypeScript errors: `npm run typecheck` across all project references (`shared`, `core`, `sync`).
+  - [x] Clean linting: `npm run lint` with 0 errors and 0 warnings.
+  - [x] Clean build: `npm run build` compiling clean `.d.ts` declarations and `.js` code across all workspaces.
 
 ---
 
 ### Phase 3: GitHub Integration & Remote Orchestration (`@nimo-deck/github`)
+**Status:** `[PENDING - NEXT]`
 **Primary Objectives:**
 Seamlessly integrate GitHub REST and GraphQL APIs for repository discovery, branch tracking, pull requests, issues, and real-time webhook ingestion.
 

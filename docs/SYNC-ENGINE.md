@@ -209,3 +209,25 @@ DECK SYNC provides a `dryRun: true` parameter across all execution interfaces:
 - Generates commit titles and bodies without modifying `HEAD`.
 - Simulates remote fetch and push compatibility without touching network remotes.
 - Emits an execution preview payload to the Dashboard so developers can verify automated behaviors before activating live sync.
+
+---
+
+## 9. Verified Implementation & Module Map
+
+The `@nimo-deck/sync` package implements this specification through the following modular components:
+
+| Component | File Path | Responsibilities |
+| :--- | :--- | :--- |
+| **GitCLI** | `packages/sync/src/git/git-cli.ts` | Child process execution via `execFile` with argument arrays; runtime assertion preventing `--force`, `-f`, `clean -fd`, or `--hard` in automated routines; timeout and buffer management. |
+| **GitStatusInspector** | `packages/sync/src/git/git-status.ts` | Machine-readable porcelain v2 parser extracting dirty tree status, ahead/behind counters, staged/unstaged changes, untracked files, and conflicts. |
+| **GitDiffInspector** | `packages/sync/src/git/git-diff.ts` | Parses numstat and diff summaries for staged files; produces truncated diffs for safe AI prompt ingestion. |
+| **GitLockMonitor** | `packages/sync/src/git/git-lock.ts` | Detects stale `.git/index.lock` files (> 60s mtime) and safely removes orphaned locks. |
+| **DebounceBatcher** | `packages/sync/src/watcher/debounce-batcher.ts` | Coalesces rapid mutation events using an inactivity window (default 5,000ms) capped by a hard burst ceiling (`maxWaitMs`, default 30,000ms). |
+| **RepoFileWatcher** | `packages/sync/src/watcher/file-watcher.ts` | Wraps `chokidar.watch` with immutable security ignore filters and dispatches to the batcher. |
+| **PreCommitScanner** | `packages/sync/src/safety/pre-commit-scanner.ts` | Pre-staging safety filter inspecting file paths, sizes, credential signatures, and Shannon entropy. Blocks secret leaks before `git add`. |
+| **CommitMessageService** | `packages/sync/src/commit/message-generator.ts` | Generates Conventional Commit messages (`feat`, `docs`, `test`, `chore`) based on path heuristics with monorepo scope inference; accepts injectable `AICommitMessageGenerator` with automatic heuristic fallback. |
+| **RepoMutex** | `packages/sync/src/sync/repo-mutex.ts` | In-memory mutex providing repository-level concurrency control to guarantee linear, non-colliding Git operations. |
+| **RetryQueue** | `packages/sync/src/sync/retry-queue.ts` | Asynchronous retry queue with exponential backoff and randomized jitter for network-related failures. |
+| **SyncCoordinator** | `packages/sync/src/sync/sync-coordinator.ts` | Central orchestration engine linking mutex, status inspection, safety scanning, staging, committing, database recording, safe pull (`--ff-only`), and conflict alerting. |
+| **SyncDaemonManager** | `packages/sync/src/daemon/daemon-manager.ts` | Multi-repository surveillance manager supporting dynamic repository registration, pause, resume, manual trigger, and graceful shutdown. |
+

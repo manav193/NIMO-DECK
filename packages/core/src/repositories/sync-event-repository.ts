@@ -31,7 +31,7 @@ export class SyncEventRepository {
     return {
       id,
       projectId: params.projectId,
-      eventType: String(params.eventType),
+      eventType: params.eventType as SyncEventType,
       status: params.status as 'SUCCESS' | 'PENDING' | 'FAILED',
       details: params.details,
       createdAt: now

@@ -14,7 +14,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@nimo-deck/shared': path.resolve(__dirname, './packages/shared/src/index.ts'),
-      '@nimo-deck/core': path.resolve(__dirname, './packages/core/src/index.ts')
+      '@nimo-deck/core': path.resolve(__dirname, './packages/core/src/index.ts'),
+      '@nimo-deck/sync': path.resolve(__dirname, './packages/sync/src/index.ts')
     }
   }
 });
