@@ -11,6 +11,7 @@ __pycache__/
 # Build Outputs & Caches
 dist/
 build/
+release/
 out/
 .next/
 .nuxt/

@@ -1,5 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron';
 import path from 'node:path';
+import fs from 'node:fs';
 import { DesktopRuntime } from './runtime.js';
 import { IPCGateway } from './ipc-gateway.js';
 
@@ -60,9 +61,11 @@ function createWindow(): void {
   if (isDev && process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    const indexPath = path.join(__dirname, '../../index.html');
-    mainWindow.loadFile(indexPath).catch(() => {
-      // In development / testing environments without prebuilt bundle
+    const rendererPath = path.join(__dirname, '../renderer/index.html');
+    const fallbackPath = path.join(__dirname, '../../index.html');
+    const targetPath = fs.existsSync(rendererPath) ? rendererPath : fallbackPath;
+    mainWindow.loadFile(targetPath).catch((err) => {
+      console.error('[NIMO-DECK Desktop] Failed to load renderer bundle:', err);
     });
   }
 
